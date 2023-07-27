@@ -27,7 +27,6 @@ struct Args {
 }
 
 #[derive(Parser, Debug)]
-#[command(author, version)]
 enum Cmd {
     /// Generate release artifacts.
     Dist(Dist),
