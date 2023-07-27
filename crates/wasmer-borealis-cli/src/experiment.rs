@@ -6,6 +6,7 @@ use std::{
 use indexmap::IndexMap;
 use semver::Version;
 
+/// A Wasmer Borealis experiment.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
 pub struct Experiment {
@@ -43,15 +44,20 @@ fn should_show_wasmer_config(cfg: &WasmerConfig) -> bool {
     version.is_latest() && env.is_empty()
 }
 
+/// The `wasmer` CLI version to use.
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum WasmerVersion {
+    /// A local binary.
     Local {
+        /// The path.
         path: PathBuf,
     },
+    /// A released version.
     #[cfg_attr(test, schemars(with = "VersionRef"))]
     Release(Version),
+    /// Use the most recent version.
     #[default]
     Latest,
 }
@@ -62,6 +68,7 @@ impl WasmerVersion {
     }
 }
 
+/// A string that supports environment variable interpolation.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
 #[serde(transparent)]
@@ -87,6 +94,7 @@ impl From<String> for TemplatedString {
     }
 }
 
+/// A semver-compatible version number.
 #[cfg(test)]
 #[derive(schemars::JsonSchema)]
 #[serde(remote = "Version")]
