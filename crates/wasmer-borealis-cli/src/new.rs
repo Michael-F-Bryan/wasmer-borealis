@@ -31,6 +31,7 @@ impl New {
         let experiment = Experiment {
             package,
             args,
+            command: None,
             env: env
                 .into_iter()
                 .map(|EnvironmentVariable { name, value }| (name, value))
@@ -38,7 +39,10 @@ impl New {
             wasmer: WasmerConfig::default(),
         };
 
-        let yaml = serde_yaml::to_string(&experiment).context("Serialization failed")?;
+        let schema = current_schema();
+        let doc = Document { experiment, schema };
+
+        let yaml = serde_yaml::to_string(&doc).context("Serialization failed")?;
 
         match output {
             Some(path) => {
@@ -73,4 +77,19 @@ impl FromStr for EnvironmentVariable {
             value: TemplatedString::new(value),
         })
     }
+}
+
+#[derive(Debug, serde::Serialize)]
+struct Document {
+    #[serde(flatten)]
+    experiment: Experiment,
+    #[serde(rename = "$schema")]
+    schema: String,
+}
+
+fn current_schema() -> String {
+    format!(
+        "{}/tree/main/experiment.schema.json",
+        env!("CARGO_PKG_REPOSITORY"),
+    )
 }

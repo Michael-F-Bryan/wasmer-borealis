@@ -8,7 +8,7 @@ use directories::ProjectDirs;
 use once_cell::sync::Lazy;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
-pub(crate) static DIRS: Lazy<ProjectDirs> =
+pub static DIRS: Lazy<ProjectDirs> =
     Lazy::new(|| ProjectDirs::from("io", "wasmer", "borealis").unwrap());
 
 fn main() -> Result<(), Error> {

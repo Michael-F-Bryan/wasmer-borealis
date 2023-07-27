@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Experiment",
+  "type": "object",
+  "required": [
+    "package"
+  ],
+  "properties": {
+    "args": {
+      "description": "Arguments that should be passed through to the package.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "command": {
+      "description": "The command to run.\n\nPrimarily used when the package doesn't specify an entrypoint and there are multiple commands available.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "env": {
+      "description": "Environment variables that should be set for the package.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "package": {
+      "description": "The name of the package used when running the experiment.",
+      "type": "string"
+    },
+    "wasmer": {
+      "$ref": "#/definitions/WasmerConfig"
+    }
+  },
+  "definitions": {
+    "Version": {
+      "type": "string"
+    },
+    "WasmerConfig": {
+      "description": "Configuration for the `wasmer` CLI being used.",
+      "type": "object",
+      "properties": {
+        "env": {
+          "description": "Environment variables passed to the `wasmer` CLI.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "description": "Which `wasmer` CLI should we use?",
+          "allOf": [
+            {
+              "$ref": "#/definitions/WasmerVersion"
+            }
+          ]
+        }
+      }
+    },
+    "WasmerVersion": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/Version"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}
