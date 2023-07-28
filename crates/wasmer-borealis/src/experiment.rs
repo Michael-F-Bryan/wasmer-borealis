@@ -6,10 +6,39 @@ use std::{
 use indexmap::IndexMap;
 use semver::Version;
 
+/// The document object for a serialized [`Experiment`].
+///
+/// This only really exists so editors can use the `$schema` property to provide
+/// auto-complete JSON schema.
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct Document {
+    #[serde(rename = "$schema")]
+    pub schema: String,
+    #[serde(flatten)]
+    pub experiment: Experiment,
+}
+
+impl Document {
+    pub fn new(experiment: Experiment) -> Self {
+        Document {
+            schema: schema_url(),
+            experiment,
+        }
+    }
+}
+
+fn schema_url() -> String {
+    // FIXME: Uncomment this when the repo goes public
+    // let repo = env!("CARGO_PKG_REPOSITORY");
+    // format!("{repo}/tree/main/experiment.schema.json")
+    "https://github.com/Michael-F-Bryan/wasmer-borealis/tree/main/experiment.schema.json"
+        .to_string()
+}
+
 /// A Wasmer Borealis experiment.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Experiment {
     /// The name of the package used when running the experiment.
     pub package: String,
@@ -34,19 +63,21 @@ pub struct Experiment {
 /// Configuration for the `wasmer` CLI being used.
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct WasmerConfig {
     /// Which `wasmer` CLI should we use?
     #[serde(default, skip_serializing_if = "WasmerVersion::is_latest")]
     pub version: WasmerVersion,
+    /// Additional arguments to pass to the `wasmer` CLI.
+    pub args: Vec<TemplatedString>,
     /// Environment variables passed to the `wasmer` CLI.
     #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
     pub env: IndexMap<String, TemplatedString>,
 }
 
 fn should_show_wasmer_config(cfg: &WasmerConfig) -> bool {
-    let WasmerConfig { version, env } = cfg;
-    version.is_latest() && env.is_empty()
+    let WasmerConfig { version, args, env } = cfg;
+    version.is_latest() && args.is_empty() && env.is_empty()
 }
 
 /// The `wasmer` CLI version to use.
@@ -103,12 +134,16 @@ impl From<String> for TemplatedString {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Filters {
     /// If provided, the experiment will be limited to running packages under
     /// just these namespaces.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub namespaces: Vec<String>,
+    /// If provided, the experiment will be limited to running packages under
+    /// just these users.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub users: Vec<String>,
     /// Packages that should be ignored.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub blacklist: Vec<String>,

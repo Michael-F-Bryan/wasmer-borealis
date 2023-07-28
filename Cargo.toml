@@ -13,8 +13,8 @@ rust-version = "1.71"
 version = "0.1.0"
 
 [workspace.dependencies]
-tokio = { version = "1.29.1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.29.1", features = ["rt", "fs", "rt-multi-thread", "macros", "process"] }
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
-tracing = { version = "0.1.37", features = ["log"] }
+tracing = { version = "0.1.37", features = ["log", "async-await"] }
 clap = { version = "4", features = ["derive", "env"] }
 reqwest = "0.11.18"

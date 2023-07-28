@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Context, Error};
 use clap::Parser;
 
-use wasmer_borealis::experiment::{Experiment, Filters, TemplatedString, WasmerConfig};
+use wasmer_borealis::experiment::{Document, Experiment, Filters, TemplatedString, WasmerConfig};
 
 #[derive(Parser, Debug)]
 pub struct New {
@@ -40,11 +40,7 @@ impl New {
             filters: Filters::default(),
         };
 
-        let doc = Document {
-            experiment,
-            schema: schema_url(),
-        };
-
+        let doc = Document::new(experiment);
         let yaml = serde_json::to_string_pretty(&doc).context("Serialization failed")?;
 
         match output {
@@ -59,14 +55,6 @@ impl New {
 
         Ok(())
     }
-}
-
-fn schema_url() -> String {
-    // FIXME: Remove the `token=` when the repo goes public
-    // let repo = env!("CARGO_PKG_REPOSITORY");
-    // format!("{repo}/tree/main/experiment.schema.json")
-    // "https://raw.githubusercontent.com/Michael-F-Bryan/wasmer-borealis/main/experiment.schema.json?token=GHSAT0AAAAAAB7G4BD7S73QZZTJ3SHVCAUCZGDJOBA".to_string()
-    "https://github.com/Michael-F-Bryan/wasmer-borealis/tree/main/experiment.schema.json?token=GHSAT0AAAAAAB7G4BD7S73QZZTJ3SHVCAUCZGDJOBA".to_string()
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -88,12 +76,4 @@ impl FromStr for EnvironmentVariable {
             value: TemplatedString::new(value),
         })
     }
-}
-
-#[derive(Debug, serde::Serialize)]
-struct Document {
-    #[serde(rename = "$schema")]
-    schema: String,
-    #[serde(flatten)]
-    experiment: Experiment,
 }

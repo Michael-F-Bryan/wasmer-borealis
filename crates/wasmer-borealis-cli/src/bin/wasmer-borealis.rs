@@ -57,7 +57,8 @@ fn initialize_logging(default_level: tracing::log::LevelFilter) {
 
     let env = EnvFilter::builder()
         .with_default_directive(default_level.into())
-        .from_env_lossy();
+        .from_env_lossy()
+        .add_directive("hyper=warn".parse().unwrap());
 
     tracing_subscriber::fmt()
         .with_target(true)

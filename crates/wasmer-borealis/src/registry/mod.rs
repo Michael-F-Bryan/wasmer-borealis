@@ -3,7 +3,7 @@ use cynic::{GraphQlResponse, QueryBuilder};
 use futures::{Sink, SinkExt};
 use reqwest::Client;
 
-#[tracing::instrument(skip(client, dest))]
+#[tracing::instrument(skip_all, fields(namespace))]
 pub async fn all_packages_in_namespace<S>(
     client: &Client,
     graphql_endpoint: &str,
@@ -57,7 +57,7 @@ where
         }
 
         for package in packages {
-            dest.feed(package).await?;
+            dest.send(package).await?;
             offset += 1;
         }
 
@@ -71,55 +71,57 @@ where
     file = "src/registry/schema.graphql",
     module = "crate::registry::schema"
 )]
-#[allow(unused_mut)]
+#[allow(unused)]
 pub mod queries {
 
-    #[derive(cynic::QueryVariables, Debug)]
+    #[derive(cynic::QueryVariables, Debug, Clone)]
     pub struct GetNamespaceVariables<'a> {
         pub name: &'a str,
         pub offset: i32,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     #[cynic(graphql_type = "Query", variables = "GetNamespaceVariables")]
     pub struct GetNamespace {
         #[arguments(name: $name)]
         pub get_namespace: Option<Namespace>,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     #[cynic(variables = "GetNamespaceVariables")]
     pub struct Namespace {
         #[arguments(offset: $offset)]
         pub packages: PackageConnection,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     pub struct PackageConnection {
         pub edges: Vec<Option<PackageEdge>>,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     pub struct PackageEdge {
         pub node: Option<Package>,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     pub struct Package {
         pub id: cynic::Id,
-        pub name: String,
+        pub package_name: String,
+        pub namespace: String,
+        pub display_name: String,
         pub last_version: Option<PackageVersion>,
         pub versions: Vec<Option<PackageVersion>>,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     pub struct PackageVersion {
         pub id: cynic::Id,
         pub version: String,
         pub distribution: PackageDistribution,
     }
 
-    #[derive(cynic::QueryFragment, Debug)]
+    #[derive(cynic::QueryFragment, Debug, Clone)]
     pub struct PackageDistribution {
         pub download_url: String,
         pub pirita_download_url: Option<String>,

@@ -39,6 +39,7 @@
       "$ref": "#/definitions/WasmerConfig"
     }
   },
+  "additionalProperties": false,
   "definitions": {
     "Filters": {
       "type": "object",
@@ -60,8 +61,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "users": {
+          "description": "If provided, the experiment will be limited to running packages under just these users.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "Version": {
       "description": "A semver-compatible version number.",
@@ -70,7 +79,17 @@
     "WasmerConfig": {
       "description": "Configuration for the `wasmer` CLI being used.",
       "type": "object",
+      "required": [
+        "args"
+      ],
       "properties": {
+        "args": {
+          "description": "Additional arguments to pass to the `wasmer` CLI.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "env": {
           "description": "Environment variables passed to the `wasmer` CLI.",
           "type": "object",
@@ -86,7 +105,8 @@
             }
           ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "WasmerVersion": {
       "description": "The `wasmer` CLI version to use.",
