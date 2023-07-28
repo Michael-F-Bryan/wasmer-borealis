@@ -1,11 +1,12 @@
 mod dist;
+mod schema;
 
 use std::path::Path;
 
 use clap::Parser;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
-use crate::dist::Dist;
+use crate::{dist::Dist, schema::Schema};
 
 fn main() -> Result<(), anyhow::Error> {
     let Args { verbosity, cmd } = Args::parse();
@@ -14,6 +15,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     match cmd {
         Cmd::Dist(d) => d.run(),
+        Cmd::Schema(s) => s.run(),
     }
 }
 
@@ -30,6 +32,8 @@ struct Args {
 enum Cmd {
     /// Generate release artifacts.
     Dist(Dist),
+    /// Update the GraphQL schema.
+    Schema(Schema),
 }
 
 /// Initialize logging.

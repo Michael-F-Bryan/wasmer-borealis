@@ -9,6 +9,7 @@ use semver::Version;
 /// A Wasmer Borealis experiment.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
+#[serde(rename_all = "kebab-case")]
 pub struct Experiment {
     /// The name of the package used when running the experiment.
     pub package: String,
@@ -16,6 +17,7 @@ pub struct Experiment {
     ///
     /// Primarily used when the package doesn't specify an entrypoint and there
     /// are multiple commands available.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<String>,
     /// Arguments that should be passed through to the package.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -25,11 +27,14 @@ pub struct Experiment {
     pub env: IndexMap<String, TemplatedString>,
     #[serde(default, skip_serializing_if = "should_show_wasmer_config")]
     pub wasmer: WasmerConfig,
+    #[serde(default, skip_serializing_if = "Filters::is_empty")]
+    pub filters: Filters,
 }
 
 /// Configuration for the `wasmer` CLI being used.
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
+#[serde(rename_all = "kebab-case")]
 pub struct WasmerConfig {
     /// Which `wasmer` CLI should we use?
     #[serde(default, skip_serializing_if = "WasmerVersion::is_latest")]
@@ -47,6 +52,7 @@ fn should_show_wasmer_config(cfg: &WasmerConfig) -> bool {
 /// The `wasmer` CLI version to use.
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
+#[serde(rename_all = "kebab-case")]
 #[serde(untagged)]
 pub enum WasmerVersion {
     /// A local binary.
@@ -71,6 +77,7 @@ impl WasmerVersion {
 /// A string that supports environment variable interpolation.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(test, derive(schemars::JsonSchema))]
+#[serde(rename_all = "kebab-case")]
 #[serde(transparent)]
 pub struct TemplatedString(String);
 
@@ -79,7 +86,7 @@ impl TemplatedString {
         TemplatedString(s.into())
     }
 
-    pub fn raw(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 
@@ -91,6 +98,29 @@ impl TemplatedString {
 impl From<String> for TemplatedString {
     fn from(value: String) -> Self {
         TemplatedString::new(value)
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(test, derive(schemars::JsonSchema))]
+#[serde(rename_all = "kebab-case")]
+pub struct Filters {
+    /// If provided, the experiment will be limited to running packages under
+    /// just these namespaces.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub namespaces: Vec<String>,
+    /// Packages that should be ignored.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub blacklist: Vec<String>,
+    /// Should every version of the package be published, or just the most
+    /// recent one?
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub include_every_version: bool,
+}
+
+impl Filters {
+    fn is_empty(&self) -> bool {
+        self.namespaces.is_empty() && self.blacklist.is_empty()
     }
 }
 

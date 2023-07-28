@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Context, Error};
 use clap::Parser;
 
-use crate::experiment::{Experiment, TemplatedString, WasmerConfig};
+use crate::experiment::{Experiment, Filters, TemplatedString, WasmerConfig};
 
 #[derive(Parser, Debug)]
 pub struct New {
@@ -37,11 +37,13 @@ impl New {
                 .map(|EnvironmentVariable { name, value }| (name, value))
                 .collect(),
             wasmer: WasmerConfig::default(),
+            filters: Filters::default(),
         };
 
-        let repo = env!("CARGO_PKG_REPOSITORY");
-        let schema = format!("{repo}/tree/main/experiment.schema.json");
-        let doc = Document { experiment, schema };
+        let doc = Document {
+            experiment,
+            schema: schema_url(),
+        };
 
         let yaml = serde_json::to_string_pretty(&doc).context("Serialization failed")?;
 
@@ -57,6 +59,14 @@ impl New {
 
         Ok(())
     }
+}
+
+fn schema_url() -> String {
+    // FIXME: Remove the `token=` when the repo goes public
+    // let repo = env!("CARGO_PKG_REPOSITORY");
+    // format!("{repo}/tree/main/experiment.schema.json")
+    // "https://raw.githubusercontent.com/Michael-F-Bryan/wasmer-borealis/main/experiment.schema.json?token=GHSAT0AAAAAAB7G4BD7S73QZZTJ3SHVCAUCZGDJOBA".to_string()
+    "https://github.com/Michael-F-Bryan/wasmer-borealis/tree/main/experiment.schema.json?token=GHSAT0AAAAAAB7G4BD7S73QZZTJ3SHVCAUCZGDJOBA".to_string()
 }
 
 #[derive(Debug, Clone, PartialEq)]

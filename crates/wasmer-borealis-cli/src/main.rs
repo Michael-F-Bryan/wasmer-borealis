@@ -1,12 +1,13 @@
 pub mod experiment;
 mod new;
 mod run;
+mod queries;
 
 use anyhow::Error;
 use clap::Parser;
 use directories::ProjectDirs;
 use once_cell::sync::Lazy;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::EnvFilter;
 
 pub static DIRS: Lazy<ProjectDirs> =
     Lazy::new(|| ProjectDirs::from("io", "wasmer", "borealis").unwrap());
@@ -49,12 +50,6 @@ enum Cmd {
 /// than the default `warn`), but anything from the `wasmer_registry` crate will
 /// be logged at the `debug` level.
 fn initialize_logging(default_level: tracing::log::LevelFilter) {
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .with_target(true)
-        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::CLOSE)
-        .with_writer(std::io::stderr)
-        .compact();
-
     let default_level = match default_level {
         tracing::log::LevelFilter::Off => tracing::level_filters::LevelFilter::OFF,
         tracing::log::LevelFilter::Error => tracing::level_filters::LevelFilter::ERROR,
@@ -64,12 +59,14 @@ fn initialize_logging(default_level: tracing::log::LevelFilter) {
         tracing::log::LevelFilter::Trace => tracing::level_filters::LevelFilter::TRACE,
     };
 
-    let filter_layer = EnvFilter::builder()
+    let env = EnvFilter::builder()
         .with_default_directive(default_level.into())
         .from_env_lossy();
 
-    tracing_subscriber::registry()
-        .with(filter_layer)
-        .with(fmt_layer)
+    tracing_subscriber::fmt()
+        .with_target(true)
+        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::CLOSE)
+        .with_writer(std::io::stderr)
+        .with_env_filter(env)
         .init();
 }
