@@ -57,16 +57,22 @@ where
         }
 
         for package in packages {
-            dest.send(package).await?;
+            dest.feed(package).await?;
             offset += 1;
         }
+
+        dest.flush().await?;
     }
 
     Ok(())
 }
 
-#[cynic::schema_for_derives(file = "src/queries/schema.graphql", module = "crate::queries::schema")]
-mod queries {
+#[cynic::schema_for_derives(
+    file = "src/registry/schema.graphql",
+    module = "crate::registry::schema"
+)]
+#[allow(unused_mut)]
+pub mod queries {
 
     #[derive(cynic::QueryVariables, Debug)]
     pub struct GetNamespaceVariables<'a> {
@@ -122,5 +128,5 @@ mod queries {
 
 #[allow(non_snake_case, non_camel_case_types)]
 mod schema {
-    cynic::use_schema!("src/queries/schema.graphql");
+    cynic::use_schema!("src/registry/schema.graphql");
 }

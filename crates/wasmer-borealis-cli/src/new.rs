@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Context, Error};
 use clap::Parser;
 
-use crate::experiment::{Experiment, Filters, TemplatedString, WasmerConfig};
+use wasmer_borealis::experiment::{Experiment, Filters, TemplatedString, WasmerConfig};
 
 #[derive(Parser, Debug)]
 pub struct New {

@@ -1,9 +1,14 @@
 use std::path::PathBuf;
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use clap::Parser;
-use futures::StreamExt;
+use futures::{channel::mpsc::Receiver, StreamExt};
 use reqwest::Client;
+
+use wasmer_borealis::{
+    experiment::{Experiment, Filters},
+    registry::queries::Package,
+};
 
 #[derive(Parser, Debug)]
 pub struct Run {
@@ -22,19 +27,45 @@ impl Run {
             experiment,
         } = self;
 
+        let experiment = std::fs::read_to_string(&experiment)
+            .with_context(|| format!("Unable to read \"{}\"", experiment.display()))?;
+        let experiment: Experiment = serde_json::from_str(&experiment)
+            .context("Unable to deserialize the experiment file")?;
+
         let url = format!("https://registry.{registry}/graphql");
         let client = Client::new();
 
-        let (sender, mut receiver) = futures::channel::mpsc::channel(16);
+        let mut receiver = fetch_packages(client, experiment.filters, url);
 
-        tokio::spawn(async move {
-            while let Some(pkg) = receiver.next().await {
-                println!("{pkg:#?}");
-            }
-        });
-
-        crate::queries::all_packages_in_namespace(&client, &url, "wasmer", sender.clone()).await?;
+        while let Some(pkg) = receiver.next().await {
+            println!("{pkg:#?}");
+        }
 
         Ok(())
     }
+}
+
+fn fetch_packages(client: Client, filters: Filters, endpoint: String) -> Receiver<Package> {
+    let (mut sender, receiver) = futures::channel::mpsc::channel(16);
+
+    tokio::spawn(async move {
+        for namespace in &filters.namespaces {
+            if let Err(e) = wasmer_borealis::registry::all_packages_in_namespace(
+                &client,
+                &endpoint,
+                "wasmer",
+                &mut sender,
+            )
+            .await
+            {
+                tracing::error!(
+                    error = &*e,
+                    namespace = namespace.as_str(),
+                    "Unable to fetch a namespace's packages"
+                );
+            }
+        }
+    });
+
+    receiver
 }

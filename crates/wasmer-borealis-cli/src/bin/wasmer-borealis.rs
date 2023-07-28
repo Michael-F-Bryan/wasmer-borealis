@@ -1,13 +1,9 @@
-pub mod experiment;
-mod new;
-mod run;
-mod queries;
-
 use anyhow::Error;
 use clap::Parser;
 use directories::ProjectDirs;
 use once_cell::sync::Lazy;
 use tracing_subscriber::EnvFilter;
+use wasmer_borealis_cli::{New, Run};
 
 pub static DIRS: Lazy<ProjectDirs> =
     Lazy::new(|| ProjectDirs::from("io", "wasmer", "borealis").unwrap());
@@ -35,9 +31,9 @@ struct Args {
 #[derive(Parser, Debug)]
 enum Cmd {
     /// Create a new experiment.
-    New(new::New),
+    New(New),
     /// Run an experiment.
-    Run(run::Run),
+    Run(Run),
 }
 
 /// Initialize logging.
