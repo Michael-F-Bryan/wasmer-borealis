@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    num::NonZeroUsize,
     path::{Path, PathBuf},
     sync::Arc,
     time::Instant,
@@ -7,20 +8,29 @@ use std::{
 
 use actix::{Actor, Context, Handler};
 use anyhow::{Context as _, Error};
+use tokio::sync::Semaphore;
 
 use crate::{
     config::Experiment,
-    experiment::{cache::Assets, orchestrator::Outcome, Report, TestCase},
+    experiment::{cache::Assets, Outcome, Report, TestCase},
 };
 
 #[derive(Debug, Clone)]
 pub(crate) struct Runner {
     experiment: Arc<Experiment>,
+    semaphore: Arc<Semaphore>,
 }
 
 impl Runner {
     pub(crate) fn new(experiment: Arc<Experiment>) -> Self {
-        Runner { experiment }
+        Runner {
+            experiment,
+            semaphore: Arc::new(Semaphore::new(
+                std::thread::available_parallelism()
+                    .unwrap_or(NonZeroUsize::new(4).unwrap())
+                    .get(),
+            )),
+        }
     }
 }
 
@@ -49,8 +59,12 @@ impl Handler<BeginTest> for Runner {
             .join(test_case.version());
 
         let experiment = self.experiment.clone();
+        let semaphore = self.semaphore.clone();
 
-        Box::pin(async move { run_experiment(&experiment, &test_case, &assets, base_dir).await })
+        Box::pin(async move {
+            let _guard = semaphore.acquire().await.unwrap();
+            run_experiment(&experiment, &test_case, &assets, base_dir).await
+        })
     }
 }
 
@@ -73,17 +87,16 @@ async fn run_experiment(
 
     let mut cmd = match setup(experiment, test_case, assets, &base_dir, dirs.home_dir()).await {
         Ok(cmd) => cmd,
-        Err(e) => {
+        Err(error) => {
             return Report {
                 display_name: test_case.display_name(),
                 package_version: test_case.package_version.clone(),
-                base_dir,
-                outcome: Outcome::SetupFailed(e),
+                outcome: Outcome::SetupFailed { base_dir, error },
             }
         }
     };
 
-    tracing::debug!(cmd=?cmd.as_std(), "Invoking wasmer CLI");
+    tracing::debug!(?cmd, "Invoking wasmer CLI");
     let start = Instant::now();
 
     let outcome = match cmd.status().await {
@@ -91,19 +104,18 @@ async fn run_experiment(
             status,
             run_time: start.elapsed(),
         },
-        Err(e) => {
-            let err = Error::new(e).context(format!(
+        Err(error) => {
+            let error = Error::new(error).context(format!(
                 "Unable to start \"{}\", is it installed?",
                 cmd.as_std().get_program().to_string_lossy()
             ));
-            Outcome::SetupFailed(err)
+            Outcome::SetupFailed { error, base_dir }
         }
     };
 
     Report {
         display_name: test_case.display_name(),
         package_version: test_case.package_version.clone(),
-        base_dir,
         outcome,
     }
 }
@@ -117,11 +129,11 @@ async fn setup(
     home_dir: &Path,
 ) -> Result<tokio::process::Command, Error> {
     if base_dir.exists() {
-        tokio::fs::remove_dir_all(&base_dir)
+        tokio::fs::remove_dir_all(base_dir)
             .await
             .context("Unable to remove the base directory")?;
     }
-    tokio::fs::create_dir_all(&base_dir)
+    tokio::fs::create_dir_all(base_dir)
         .await
         .context("Unable to create the base dir")?;
 

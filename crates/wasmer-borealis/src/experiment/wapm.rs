@@ -1,5 +1,5 @@
-use actix::{Actor, AsyncContext, Context, Handler, Recipient, WrapFuture};
-use futures::{Stream, StreamExt};
+use actix::{Actor, AsyncContext, Context, Handler, WrapFuture};
+use futures::{channel::mpsc::Sender, SinkExt, Stream, StreamExt};
 use reqwest::Client;
 use tracing::Instrument;
 
@@ -30,19 +30,22 @@ impl Actor for Wapm {
 #[rtype(result = "()")]
 pub(crate) struct FetchTestCases {
     pub filters: Filters,
-    pub recipient: Recipient<TestCasesDiscovered>,
+    pub recipient: Sender<TestCaseDiscovered>,
 }
 
 /// A batch of [`TestCase`]s have been discovered from the registry.
 #[derive(Debug, Clone, actix::Message)]
 #[rtype(result = "()")]
-pub(crate) struct TestCasesDiscovered(pub Vec<TestCase>);
+pub(crate) struct TestCaseDiscovered(pub TestCase);
 
 impl Handler<FetchTestCases> for Wapm {
     type Result = ();
 
     fn handle(&mut self, msg: FetchTestCases, ctx: &mut Self::Context) {
-        let FetchTestCases { filters, recipient } = msg;
+        let FetchTestCases {
+            filters,
+            mut recipient,
+        } = msg;
 
         let client = self.client.clone();
         let endpoint = self.endpoint.clone();
@@ -51,14 +54,12 @@ impl Handler<FetchTestCases> for Wapm {
             async move {
                 let mut responses = discover_test_cases(client, filters, endpoint);
 
-                while let Some(test_case) = responses.next().await {
-                    if recipient
-                        .send(TestCasesDiscovered(test_case))
-                        .await
-                        .is_err()
-                    {
-                        break;
-                    };
+                while let Some(test_cases) = responses.next().await {
+                    for test_case in test_cases {
+                        if recipient.send(TestCaseDiscovered(test_case)).await.is_err() {
+                            break;
+                        };
+                    }
                 }
             }
             .instrument(tracing::debug_span!("discover_test_cases"))
@@ -89,7 +90,7 @@ fn discover_test_cases(
                 if let Err(e) = crate::registry::all_packages_in_namespace(
                     &client,
                     &endpoint,
-                    "wasmer",
+                    namespace,
                     &mut sender,
                 )
                 .await
@@ -98,6 +99,19 @@ fn discover_test_cases(
                         error = &*e,
                         namespace = namespace.as_str(),
                         "Unable to fetch a namespace's packages"
+                    );
+                }
+            }
+
+            for user in &users {
+                if let Err(e) =
+                    crate::registry::all_packages_by_user(&client, &endpoint, user, &mut sender)
+                        .await
+                {
+                    tracing::error!(
+                        error = &*e,
+                        user = user.as_str(),
+                        "Unable to fetch a user's packages"
                     );
                 }
             }

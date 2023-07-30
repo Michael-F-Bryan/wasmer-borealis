@@ -1,13 +1,14 @@
 use std::{
     path::{Path, PathBuf},
+    sync::Arc,
     time::{Duration, Instant},
 };
 
 use actix::{Actor, Context, Handler, Recipient};
 use anyhow::{Context as _, Error};
-use futures::{FutureExt, StreamExt};
 use reqwest::Client;
 use tempfile::TempDir;
+use tokio::sync::Semaphore;
 
 use crate::experiment::wapm::TestCase;
 
@@ -18,6 +19,7 @@ pub(crate) struct Cache {
     dir: PathBuf,
     client: Client,
     progress: Recipient<CacheStatusMessage>,
+    download_limiter: Arc<Semaphore>,
 }
 
 impl Cache {
@@ -30,6 +32,7 @@ impl Cache {
             dir,
             client,
             progress,
+            download_limiter: Arc::new(Semaphore::new(MAX_CONCURRENT_DOWNLOADS)),
         }
     }
 }
@@ -39,50 +42,38 @@ impl Actor for Cache {
 }
 
 #[derive(Debug, Clone, actix::Message)]
-#[rtype(result = "AssetsFetched")]
+#[rtype(result = "Result<AssetsFetched, Error>")]
 pub(crate) struct FetchAssets {
-    pub test_cases: Vec<TestCase>,
+    pub test_case: TestCase,
 }
 
 impl Handler<FetchAssets> for Cache {
-    type Result = actix::ResponseFuture<AssetsFetched>;
+    type Result = actix::ResponseFuture<Result<AssetsFetched, Error>>;
 
     fn handle(
         &mut self,
         msg: FetchAssets,
         _ctx: &mut Self::Context,
-    ) -> actix::ResponseFuture<AssetsFetched> {
-        let FetchAssets { test_cases } = msg;
+    ) -> actix::ResponseFuture<Result<AssetsFetched, Error>> {
+        let FetchAssets { test_case } = msg;
         let progress = self.progress.clone();
         let dir = self.dir.clone();
         let client = self.client.clone();
+        let semaphore = self.download_limiter.clone();
 
-        let fut = futures::stream::iter(test_cases)
-            .map(move |test_case| {
-                let progress = progress.clone();
-                let dir = dir.clone();
-                let client = client.clone();
-
-                async move {
-                    let result = download(&client, &dir, test_case.clone(), progress).await;
-                    (test_case, result)
-                }
-            })
-            .buffer_unordered(MAX_CONCURRENT_DOWNLOADS)
-            .collect()
-            .map(|results: Vec<_>| {
-                let fetched = results
-                    .into_iter()
-                    .filter_map(|(t, r)| Some((t, r?)))
-                    .collect();
-                AssetsFetched(fetched)
-            });
-        Box::pin(fut)
+        Box::pin(async move {
+            let _guard = semaphore.acquire().await?;
+            let assets = download(&client, &dir, &test_case, progress).await?;
+            Ok(AssetsFetched { test_case, assets })
+        })
     }
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct AssetsFetched(pub Vec<(TestCase, Assets)>);
+pub(crate) struct AssetsFetched {
+    pub test_case: TestCase,
+    pub assets: Assets,
+}
 
 #[derive(Debug, Clone)]
 pub(crate) struct Assets {
@@ -100,10 +91,6 @@ pub(crate) enum CacheStatusMessage {
         test_case: TestCase,
         duration: Duration,
     },
-    DownloadFailed {
-        test_case: TestCase,
-        error: Error,
-    },
 }
 
 #[tracing::instrument(skip_all, fields(
@@ -114,14 +101,14 @@ pub(crate) enum CacheStatusMessage {
 async fn download(
     client: &Client,
     dir: &Path,
-    test_case: TestCase,
+    test_case: &TestCase,
     progress: Recipient<CacheStatusMessage>,
-) -> Option<Assets> {
+) -> Result<Assets, Error> {
     let _ = progress
         .send(CacheStatusMessage::Fetching(test_case.clone()))
         .await;
 
-    let cache_dir = package_version_dir(dir, &test_case);
+    let cache_dir = package_version_dir(dir, test_case);
     let tarball_path = cache_dir
         .join(&test_case.package_name)
         .with_extension("tar.gz");
@@ -131,38 +118,30 @@ async fn download(
 
     if cache_dir.exists() && tarball_path.exists() {
         tracing::debug!(cache_dir=%cache_dir.display(), "Cache hit!");
-        let _ = progress.send(CacheStatusMessage::CacheHit(test_case)).await;
+        let _ = progress
+            .send(CacheStatusMessage::CacheHit(test_case.clone()))
+            .await;
 
-        return Some(Assets {
+        return Ok(Assets {
             tarball: tarball_path,
             webc: webc_path.exists().then_some(webc_path),
         });
     }
 
     let start = Instant::now();
-    match do_download(client, dir, &cache_dir, tarball_path, webc_path, &test_case).await {
-        Ok(assets) => {
-            let duration = start.elapsed();
+    let result = do_download(client, dir, &cache_dir, tarball_path, webc_path, test_case).await;
 
-            let _ = progress
-                .send(CacheStatusMessage::CacheMiss {
-                    test_case,
-                    duration,
-                })
-                .await;
-
-            Some(assets)
-        }
-        Err(error) => {
-            let _ = progress
-                .send(CacheStatusMessage::DownloadFailed {
-                    test_case: test_case.clone(),
-                    error,
-                })
-                .await;
-            None
-        }
+    if result.is_ok() {
+        let duration = start.elapsed();
+        let _ = progress
+            .send(CacheStatusMessage::CacheMiss {
+                test_case: test_case.clone(),
+                duration,
+            })
+            .await;
     }
+
+    result
 }
 
 async fn do_download(

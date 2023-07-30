@@ -1,152 +1,127 @@
-use std::{path::PathBuf, process::ExitStatus, sync::Arc, time::Duration};
+use std::sync::Arc;
 
-use actix::{
-    Actor, ActorFutureExt, Addr, AsyncContext, Context, Handler, StreamHandler, System, WrapFuture,
-};
+use actix::{Actor, Addr, Context, Handler, ResponseFuture};
 use anyhow::Error;
-use futures::{channel::oneshot::Sender, FutureExt};
+use futures::{stream::FuturesUnordered, StreamExt};
 use reqwest::Client;
 
 use crate::{
     config::Experiment,
     experiment::{
-        cache::{Assets, Cache, FetchAssets},
+        cache::{AssetsFetched, Cache, FetchAssets},
         runner::{BeginTest, Runner},
-        wapm::{FetchTestCases, TestCase, TestCasesDiscovered, Wapm},
+        wapm::{FetchTestCases, TestCaseDiscovered, Wapm},
+        Outcome, Report, Results,
     },
-    registry::queries::PackageVersion,
 };
 
 /// The top-level experiment runner.
 #[derive(Debug)]
 pub(crate) struct Orchestrator {
     cache: Addr<Cache>,
-    experiment: Arc<Experiment>,
-    reports: Vec<Report>,
-    sender: Option<Sender<Results>>,
     client: Client,
     endpoint: String,
 }
 
 impl Orchestrator {
-    pub fn new(
-        experiment: Arc<Experiment>,
-        cache: Addr<Cache>,
-        client: Client,
-        endpoint: String,
-        sender: Sender<Results>,
-    ) -> Self {
+    pub fn new(cache: Addr<Cache>, client: Client, endpoint: String) -> Self {
         Orchestrator {
             cache,
             client,
             endpoint,
-            experiment,
-            sender: Some(sender),
-            reports: Vec::new(),
         }
     }
 }
 
 impl Actor for Orchestrator {
     type Context = Context<Self>;
-
-    fn started(&mut self, ctx: &mut Self::Context) {
-        let wapm = Wapm::new(self.client.clone(), self.endpoint.clone()).start();
-
-        // Kick everything off by telling WAPM to send all the candidates
-        // to our orchestrator
-        ctx.spawn(
-            wapm.send(FetchTestCases {
-                filters: self.experiment.filters.clone(),
-                recipient: ctx.address().recipient(),
-            })
-            .map(|_| {})
-            .into_actor(self),
-        );
-    }
-
-    fn stopped(&mut self, _ctx: &mut Self::Context) {
-        let results = Results {
-            outcomes: std::mem::take(&mut self.reports),
-        };
-        let _ = self.sender.take().unwrap().send(results);
-        System::current().stop();
-    }
-}
-
-impl Handler<TestCasesDiscovered> for Orchestrator {
-    type Result = ();
-
-    fn handle(&mut self, msg: TestCasesDiscovered, ctx: &mut Self::Context) {
-        let TestCasesDiscovered(test_cases) = msg;
-        let cache = self.cache.clone();
-
-        ctx.spawn(
-            cache
-                .send(FetchAssets { test_cases })
-                .into_actor(self)
-                .then(|result, _, ctx| {
-                    if let Ok(fetched) = result {
-                        ctx.add_stream(futures::stream::iter(fetched.0));
-                    }
-                    actix::fut::ready(())
-                }),
-        );
-    }
-}
-
-impl StreamHandler<(TestCase, Assets)> for Orchestrator {
-    fn handle(&mut self, (test_case, assets): (TestCase, Assets), ctx: &mut Self::Context) {
-        let runner = Runner::new(self.experiment.clone()).start();
-        let addr = ctx.address();
-
-        ctx.spawn(
-            runner
-                .send(BeginTest { test_case, assets })
-                .into_actor(self)
-                .then(|result, actor, _| {
-                    async move {
-                        if let Ok(report) = dbg!(result) {
-                            let _ = addr.send(SaveReport(report)).await;
-                        }
-                    }
-                    .into_actor(actor)
-                }),
-        );
-    }
 }
 
 #[derive(Debug, actix::Message)]
-#[rtype(result = "()")]
-struct SaveReport(Report);
+#[rtype(result = "Results")]
+pub struct BeginExperiment {
+    pub experiment: Arc<Experiment>,
+}
 
-impl Handler<SaveReport> for Orchestrator {
-    type Result = ();
+impl Handler<BeginExperiment> for Orchestrator {
+    type Result = ResponseFuture<Results>;
 
-    fn handle(&mut self, msg: SaveReport, _ctx: &mut Self::Context) {
-        self.reports.push(msg.0);
+    fn handle(
+        &mut self,
+        msg: BeginExperiment,
+        _ctx: &mut Self::Context,
+    ) -> actix::ResponseFuture<Results> {
+        let BeginExperiment { experiment } = msg;
+
+        let (sender, receiver) = futures::channel::mpsc::channel(1);
+
+        let cache = self.cache.clone();
+        let wapm = Wapm::new(self.client.clone(), self.endpoint.clone()).start();
+        let runner = Runner::new(experiment.clone()).start();
+
+        wapm.do_send(FetchTestCases {
+            filters: experiment.filters.clone(),
+            recipient: sender,
+        });
+
+        let mut reports = receiver.map(move |TestCaseDiscovered(test_case)| {
+            let cache = cache.clone();
+            let runner = runner.clone();
+
+            async move {
+                let result = cache
+                    .send(FetchAssets {
+                        test_case: test_case.clone(),
+                    })
+                    .await
+                    .map_err(Error::from)
+                    .and_then(|r| r);
+
+                let begin_test = match result {
+                    Ok(AssetsFetched { test_case, assets }) => BeginTest { test_case, assets },
+                    Err(error) => {
+                        return Report {
+                            display_name: test_case.display_name(),
+                            package_version: test_case.package_version,
+                            outcome: Outcome::FetchFailed { error },
+                        };
+                    }
+                };
+
+                runner.send(begin_test).await.unwrap()
+            }
+        });
+
+        Box::pin(async move {
+            let mut futures = FuturesUnordered::new();
+            let mut completed = Vec::new();
+
+            // Note: for maximum throughput, poll the reports while still
+            // fetching test cases.
+            loop {
+                futures::select! {
+                    fut = reports.next() => {
+                        match fut {
+                            Some(fut) => futures.push(fut),
+                            None => {
+                                break;
+                            },
+                        }
+                    }
+                    report = futures.next() => {
+                        if let Some(report) = report {
+                            completed.push(report);
+                        }
+                    }
+                }
+            }
+
+            let remaining_reports: Vec<_> = futures.collect().await;
+            completed.extend(remaining_reports);
+
+            Results {
+                outcomes: completed,
+            }
+        })
     }
-}
-
-#[derive(Debug)]
-pub struct Results {
-    pub outcomes: Vec<Report>,
-}
-
-#[derive(Debug)]
-pub struct Report {
-    pub display_name: String,
-    pub package_version: PackageVersion,
-    pub base_dir: PathBuf,
-    pub outcome: Outcome,
-}
-
-#[derive(Debug)]
-pub enum Outcome {
-    Completed {
-        status: ExitStatus,
-        run_time: Duration,
-    },
-    SetupFailed(Error),
-    SpawnFailed(Error),
 }

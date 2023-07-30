@@ -2046,6 +2046,7 @@ version = "0.1.0"
 dependencies = [
  "actix",
  "anyhow",
+ "cfg-if",
  "cynic",
  "directories",
  "futures",

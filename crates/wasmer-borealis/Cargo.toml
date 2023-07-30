@@ -14,6 +14,7 @@ version.workspace = true
 [dependencies]
 actix = "0.13.0"
 anyhow = "1"
+cfg-if = "1.0.0"
 cynic = { version = "3.2.2", features = ["http-reqwest"] }
 directories = "5"
 futures = "0.3.28"

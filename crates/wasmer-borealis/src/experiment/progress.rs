@@ -1,7 +1,6 @@
 use std::{fmt::Debug, time::Duration};
 
 use actix::{Actor, Context, Handler};
-use anyhow::Error;
 
 use crate::experiment::{cache::CacheStatusMessage, wapm::TestCase};
 
@@ -15,7 +14,6 @@ impl ProgressMonitor {
 }
 
 pub trait Progress: Debug {
-    fn downloading_assets_failed(&mut self, _test_case: TestCase, _error: Error) {}
     fn downloading(&mut self, _test_case: TestCase) {}
     fn cache_hit(&mut self, _test_case: TestCase) {}
     fn cache_miss(&mut self, _test_case: TestCase, _duration: Duration) {}
@@ -36,9 +34,6 @@ impl Handler<CacheStatusMessage> for ProgressMonitor {
                 test_case,
                 duration,
             } => self.0.cache_miss(test_case, duration),
-            CacheStatusMessage::DownloadFailed { test_case, error } => {
-                self.0.downloading_assets_failed(test_case, error)
-            }
         }
     }
 }

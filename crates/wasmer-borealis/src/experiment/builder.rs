@@ -9,7 +9,7 @@ use crate::{
     config::Experiment,
     experiment::{
         cache::Cache,
-        orchestrator::Orchestrator,
+        orchestrator::{BeginExperiment, Orchestrator},
         progress::{Progress, ProgressMonitor},
         Results,
     },
@@ -85,18 +85,13 @@ impl ExperimentBuilder {
             None => System::new(),
         };
 
-        let mut receiver = system.block_on(async {
+        let results = system.block_on(async {
             let progress = ProgressMonitor::new(progress).start();
-            let cache = Cache::new(cache_dir, client.clone(), progress.clone().recipient()).start();
+            let cache = Cache::new(cache_dir, client.clone(), progress.recipient()).start();
+            let orchestrator = Orchestrator::new(cache, client, endpoint).start();
 
-            let (sender, receiver) = futures::channel::oneshot::channel();
-            Orchestrator::new(experiment, cache, client, endpoint, sender).start();
-
-            Ok::<_, Error>(receiver)
+            orchestrator.send(BeginExperiment { experiment }).await
         })?;
-
-        system.run()?;
-        let results = receiver.try_recv().unwrap().unwrap();
 
         Ok(results)
     }
