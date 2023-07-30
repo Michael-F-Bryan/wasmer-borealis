@@ -12,7 +12,7 @@ use reqwest::Client;
 
 use tempfile::TempDir;
 use wasmer_borealis::{
-    experiment::{Document, Experiment, Filters},
+    config::{Document, Experiment, Filters},
     registry::queries::{Package, PackageVersion},
 };
 
@@ -536,14 +536,17 @@ fn discover_test_cases(
     }
 
     receiver
+        .flat_map(futures::stream::iter)
         .filter(move |pkg| {
             futures::future::ready(blacklist.is_empty() || !blacklist.contains(&pkg.display_name))
         })
         .flat_map(move |pkg| {
-            futures::stream::iter(if include_every_version {
-                TestCase::all(pkg)
-            } else {
-                TestCase::latest(pkg)
+            futures::stream::iter({
+                if include_every_version {
+                    TestCase::all(pkg)
+                } else {
+                    TestCase::latest(pkg)
+                }
             })
         })
 }

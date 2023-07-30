@@ -11,7 +11,7 @@ pub async fn all_packages_in_namespace<S>(
     mut dest: S,
 ) -> Result<(), Error>
 where
-    S: Sink<queries::Package> + Unpin,
+    S: Sink<Vec<queries::Package>> + Unpin,
     S::Error: std::error::Error + Send + Sync + 'static,
 {
     let mut offset = 0;
@@ -56,11 +56,8 @@ where
             break;
         }
 
-        for package in packages {
-            dest.send(package).await?;
-            offset += 1;
-        }
-
+        offset += i32::try_from(packages.len()).unwrap();
+        dest.send(packages).await?;
         dest.flush().await?;
     }
 
