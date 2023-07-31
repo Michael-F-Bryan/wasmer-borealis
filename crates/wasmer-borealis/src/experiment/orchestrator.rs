@@ -89,7 +89,9 @@ impl Handler<BeginExperiment> for Orchestrator {
                         return Report {
                             display_name: test_case.display_name(),
                             package_version: test_case.package_version,
-                            outcome: Outcome::FetchFailed { error },
+                            outcome: Outcome::FetchFailed {
+                                error: error.into(),
+                            },
                         };
                     }
                 };
@@ -126,6 +128,7 @@ impl Handler<BeginExperiment> for Orchestrator {
             completed.extend(remaining_reports);
 
             Results {
+                experiment: Experiment::clone(&experiment),
                 reports: completed,
                 total_time: start.elapsed(),
                 experiment_dir: base_dir,

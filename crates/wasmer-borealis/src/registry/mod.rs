@@ -176,7 +176,8 @@ pub mod queries {
         pub node: Option<Package>,
     }
 
-    #[derive(cynic::QueryFragment, Debug, Clone)]
+    #[derive(cynic::QueryFragment, Debug, Clone, serde::Serialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct Package {
         pub id: cynic::Id,
         pub package_name: String,
@@ -186,14 +187,16 @@ pub mod queries {
         pub versions: Vec<Option<PackageVersion>>,
     }
 
-    #[derive(cynic::QueryFragment, Debug, Clone)]
+    #[derive(cynic::QueryFragment, Debug, Clone, serde::Serialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct PackageVersion {
         pub id: cynic::Id,
         pub version: String,
         pub distribution: PackageDistribution,
     }
 
-    #[derive(cynic::QueryFragment, Debug, Clone)]
+    #[derive(cynic::QueryFragment, Debug, Clone, serde::Serialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct PackageDistribution {
         pub download_url: String,
         pub pirita_download_url: Option<String>,

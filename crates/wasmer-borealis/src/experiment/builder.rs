@@ -69,7 +69,7 @@ impl ExperimentBuilder {
         }
     }
 
-    pub fn experiment_dir(self, experiment_dir: impl Into<PathBuf>) -> Self {
+    pub fn with_experiment_dir(self, experiment_dir: impl Into<PathBuf>) -> Self {
         ExperimentBuilder {
             experiment_dir: Some(experiment_dir.into()),
             ..self
@@ -116,6 +116,10 @@ impl ExperimentBuilder {
         let report = crate::render::html(&results)?;
         let reports_html = experiment_dir.join("report.html");
         std::fs::write(reports_html, report)?;
+
+        let reports_json = experiment_dir.join("results.json");
+        let json = serde_json::to_string_pretty(&results)?;
+        std::fs::write(reports_json, json)?;
 
         Ok(results)
     }

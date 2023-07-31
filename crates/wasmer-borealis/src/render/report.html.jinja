@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Experiment Results</title>
+
+    <style>
+        table {
+            border: 1px black;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <h1>Experimental Setup</h1>
+
+        <table>
+            <tbody>
+                <tr>
+                    <td>Wasmer</td>
+                    {% if experiment.wasmer and experiment.wasmer.version %}
+                    <td>{{ experiment.wasmer.version.path if experiment.wasmer.version.path else
+                        experiment.wasmer.version }}</td>
+                    {% else %}
+                    <td>latest</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Command</td>
+                    <td><code>{{ experiment.package }} {{ experiment.args | join(' ') }}</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <details>
+            <summary>(Raw)</summary>
+            <pre><code>{{ experiment | pprint }}</code></pre>
+        </details>
+    </section>
+
+    <section>
+        <h1>Results</h1>
+
+        <p>
+            Completed in {{ total_time }} with {{ reports.success | length }} successes,
+            {{ reports.failures | length }} failures, and {{ reports.bugs | length }} bugs.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <td>Package</td>
+                    <td>Outcome</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bug in reports.bugs %}
+                <tr>
+                    <td><a href="#{{ bug.display_name }}">{{ bug.display_name }}</a></td>
+                    <td>🐛</td>
+                </tr>
+                {% endfor %}
+                {% for failure in reports.failures %}
+                <tr>
+                    <td><a href="#{{ failure.display_name }}">{{ failure.display_name }}</a></td>
+                    <td>❌</td>
+                </tr>
+                {% endfor %}
+                {% for success in reports.success %}
+                <tr>
+                    <td><a href="#{{ success.display_name }}">{{ success.display_name }}</a></td>
+                    <td>✔</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+
+</html>

@@ -92,7 +92,7 @@ async fn run_experiment(
             return Report {
                 display_name: test_case.display_name(),
                 package_version: test_case.package_version.clone(),
-                outcome: Outcome::SetupFailed { base_dir, error },
+                outcome: Outcome::SetupFailed { base_dir, error: error.into() },
             }
         }
     };
@@ -102,7 +102,8 @@ async fn run_experiment(
 
     let outcome = match cmd.status().await {
         Ok(status) => Outcome::Completed {
-            status,
+            base_dir,
+            status: status.into(),
             run_time: start.elapsed(),
         },
         Err(error) => {
@@ -110,7 +111,10 @@ async fn run_experiment(
                 "Unable to start \"{}\", is it installed?",
                 cmd.as_std().get_program().to_string_lossy()
             ));
-            Outcome::SetupFailed { error, base_dir }
+            Outcome::SetupFailed {
+                error: error.into(),
+                base_dir,
+            }
         }
     };
 
