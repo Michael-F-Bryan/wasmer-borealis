@@ -45,6 +45,10 @@
             background-color: rgb(70, 162, 188);
             color: white;
         }
+
+        details.experiment-config {
+            margin: 2em;
+        }
     </style>
 </head>
 
@@ -76,8 +80,8 @@
             </tbody>
         </table>
 
-        <details>
-            <summary>(Raw)</summary>
+        <details class="experiment-config">
+            <summary>(Original Config)</summary>
             <pre><code>{{ experiment | pprint }}</code></pre>
         </details>
     </section>
@@ -86,7 +90,8 @@
         <h1>Summary</h1>
 
         <p>
-            Completed in {{ total_time }} with {{ reports.success | length }} successes,
+            Completed {{ reports.all | length }} experiments in {{ total_time }} with {{ reports.success | length }}
+            successes,
             {{ reports.failures | length }} failures, and {{ reports.bugs | length }} bugs.
         </p>
 
@@ -156,7 +161,7 @@
                     {% if report.outcome.run_time %}
                     <tr>
                         <td>Run Time</td>
-                        <td>{{ report.outcome.run_time }}</td>
+                        <td>{{ report.outcome.run_time.secs }}</td>
                     </tr>
                     {% endif %}
                     {% if report.outcome.base_dir %}

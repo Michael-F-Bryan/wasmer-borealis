@@ -31,7 +31,7 @@ pub fn html(results: &Results) -> Result<String, Error> {
     let ctx = minijinja::context! {
         experiment,
         reports => ReportCategories::new(reports),
-        total_time => format!("{total_time:?}"),
+        total_time => format!("{total_time:.1?}"),
         experiment_dir,
     };
 
