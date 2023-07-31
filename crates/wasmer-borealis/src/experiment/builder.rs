@@ -4,6 +4,7 @@ use actix::{Actor, System};
 use anyhow::Error;
 use reqwest::Client;
 use tokio::runtime::Runtime;
+use tracing::Instrument;
 
 use crate::{
     config::Experiment,
@@ -100,18 +101,21 @@ impl ExperimentBuilder {
             None => System::new(),
         };
 
-        let results = system.block_on(async {
-            let progress = ProgressMonitor::new(progress).start();
-            let cache = Cache::new(cache_dir, client.clone(), progress.recipient()).start();
-            let orchestrator = Orchestrator::new(cache, client, endpoint).start();
+        let results = system.block_on(
+            async {
+                let progress = ProgressMonitor::new(progress).start();
+                let cache = Cache::new(cache_dir, client.clone(), progress.recipient()).start();
+                let orchestrator = Orchestrator::new(cache, client, endpoint).start();
 
-            orchestrator
-                .send(BeginExperiment {
-                    experiment,
-                    base_dir: experiment_dir.clone(),
-                })
-                .await
-        })?;
+                orchestrator
+                    .send(BeginExperiment {
+                        experiment,
+                        base_dir: experiment_dir.clone(),
+                    })
+                    .await
+            }
+            .in_current_span(),
+        )?;
 
         let report = crate::render::html(&results)?;
         let reports_html = experiment_dir.join("report.html");

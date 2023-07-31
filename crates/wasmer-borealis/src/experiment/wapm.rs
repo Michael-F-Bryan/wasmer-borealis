@@ -133,7 +133,7 @@ fn discover_test_cases(
 }
 
 /// A package version that will be included in the experiment.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct TestCase {
     pub namespace: String,
     pub package_name: String,

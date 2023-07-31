@@ -92,7 +92,10 @@ async fn run_experiment(
             return Report {
                 display_name: test_case.display_name(),
                 package_version: test_case.package_version.clone(),
-                outcome: Outcome::SetupFailed { base_dir, error: error.into() },
+                outcome: Outcome::SetupFailed {
+                    base_dir,
+                    error: error.into(),
+                },
             }
         }
     };
@@ -141,6 +144,10 @@ async fn setup(
     tokio::fs::create_dir_all(base_dir)
         .await
         .context("Unable to create the base dir")?;
+
+    let test_case_json = base_dir.join("test_case.json");
+    let json = serde_json::to_string_pretty(test_case)?;
+    tokio::fs::write(test_case_json, json).await?;
 
     let working_dir = base_dir.join("working");
 

@@ -12,7 +12,7 @@ use tokio::sync::Semaphore;
 
 use crate::experiment::wapm::TestCase;
 
-const MAX_CONCURRENT_DOWNLOADS: usize = 16;
+const DEFAULT_CONCURRENT_DOWNLOADS: usize = 16;
 
 #[derive(Debug, Clone)]
 pub(crate) struct Cache {
@@ -32,7 +32,11 @@ impl Cache {
             dir,
             client,
             progress,
-            download_limiter: Arc::new(Semaphore::new(MAX_CONCURRENT_DOWNLOADS)),
+            download_limiter: Arc::new(Semaphore::new(
+                std::thread::available_parallelism()
+                    .map(|p| p.get())
+                    .unwrap_or(DEFAULT_CONCURRENT_DOWNLOADS),
+            )),
         }
     }
 }
