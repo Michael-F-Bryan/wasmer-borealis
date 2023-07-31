@@ -6,8 +6,44 @@
     <title>Experiment Results</title>
 
     <style>
+        body {
+            margin: 1em;
+        }
+
         table {
-            border: 1px black;
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table td,
+        table th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table tr:hover {
+            background-color: #ddd;
+        }
+
+        table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+        }
+
+        table.experimental-setup thead tr {
+            background-color: #04AA6D;
+            color: white;
+        }
+
+        table.summary thead tr {
+            background-color: rgb(70, 162, 188);
+            color: white;
         }
     </style>
 </head>
@@ -16,7 +52,13 @@
     <section>
         <h1>Experimental Setup</h1>
 
-        <table>
+        <table class="experimental-setup">
+            <thead>
+                <tr>
+                    <td>Setting</td>
+                    <td>Value</td>
+                </tr>
+            </thead>
             <tbody>
                 <tr>
                     <td>Wasmer</td>
@@ -41,41 +83,119 @@
     </section>
 
     <section>
-        <h1>Results</h1>
+        <h1>Summary</h1>
 
         <p>
             Completed in {{ total_time }} with {{ reports.success | length }} successes,
             {{ reports.failures | length }} failures, and {{ reports.bugs | length }} bugs.
         </p>
 
-        <table>
+        <table class="summary">
             <thead>
                 <tr>
                     <td>Package</td>
+                    <td>Version</td>
                     <td>Outcome</td>
                 </tr>
             </thead>
             <tbody>
                 {% for bug in reports.bugs %}
                 <tr>
-                    <td><a href="#{{ bug.display_name }}">{{ bug.display_name }}</a></td>
+                    <td>
+                        <a href="#{{ bug.display_name }}-{{ bug.package_version.version }}">
+                            {{ bug.display_name }}
+                        </a>
+                    </td>
+                    <td>{{ bug.package_version.version }}</td>
                     <td>🐛</td>
                 </tr>
                 {% endfor %}
                 {% for failure in reports.failures %}
                 <tr>
-                    <td><a href="#{{ failure.display_name }}">{{ failure.display_name }}</a></td>
+                    <td>
+                        <a href="#{{ failure.display_name }}-{{ failure.package_version.version }}">
+                            {{ failure.display_name }}
+                        </a>
+                    </td>
+                    <td>{{ failure.package_version.version }}</td>
                     <td>❌</td>
                 </tr>
                 {% endfor %}
                 {% for success in reports.success %}
                 <tr>
-                    <td><a href="#{{ success.display_name }}">{{ success.display_name }}</a></td>
+                    <td>
+                        <a href="#{{ success.display_name }}-{{ success.package_version.version }}">
+                            {{ success.display_name }}
+                        </a>
+                    </td>
+                    <td>{{ success.package_version.version }}</td>
                     <td>✔</td>
                 </tr>
                 {% endfor %}
             </tbody>
+
         </table>
+    </section>
+
+    <section>
+        <h2>Experiment Results</h2>
+
+        {% for report in reports.all %}
+        <div>
+            <h3 id="{{ report.display_name }}-{{ report.package_version.version }}">{{ report.display_name }} ({{
+                report.package_version.version }})</h3>
+
+            <table>
+                <tbody>
+                    {% if report.outcome.status %}
+                    <tr>
+                        <td>Exit Code</td>
+                        <td>{{ report.outcome.status.code }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if report.outcome.run_time %}
+                    <tr>
+                        <td>Run Time</td>
+                        <td>{{ report.outcome.run_time }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if report.outcome.base_dir %}
+                    <tr>
+                        <td>Working Directory</td>
+                        <td><code>{{report.outcome.base_dir}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Stdout</td>
+                        <td>
+                            {% with url = report.outcome.base_dir | file_url %}
+                            <a href="{{url}}/stdout.txt">stdout.txt</a>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Stderr</td>
+                        <td>
+                            {% with url = report.outcome.base_dir | file_url %}
+                            <a href="{{url}}/stderr.txt">stderr.txt</a>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if report.outcome.error %}
+                    {% set error = report.outcome.error %}
+                    <tr>
+                        <td>Error</td>
+                        <td>{{ error.error }}</td>
+                    </tr>
+                    <tr>
+                        <td>Backtrace</td>
+                        <td>{{ error.detailed_error }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
     </section>
 </body>
 

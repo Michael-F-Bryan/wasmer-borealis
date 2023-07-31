@@ -9,8 +9,15 @@ static TEMPLATES: Lazy<minijinja::Environment<'static>> = Lazy::new(|| {
     let mut env = minijinja::Environment::new();
     env.add_template("report", include_str!("report.html.jinja"))
         .unwrap();
+    env.add_filter("file_url", file_url);
     env
 });
+
+fn file_url(path: String) -> String {
+    url::Url::from_file_path(&path)
+        .map(|u| u.to_string())
+        .unwrap_or(path)
+}
 
 #[tracing::instrument(skip_all)]
 pub fn html(results: &Results) -> Result<String, Error> {
@@ -37,6 +44,7 @@ struct ReportCategories<'a> {
     bugs: Vec<&'a Report>,
     success: Vec<&'a Report>,
     failures: Vec<&'a Report>,
+    all: Vec<&'a Report>,
     total: usize,
 }
 
@@ -58,10 +66,17 @@ impl<'a> ReportCategories<'a> {
             }
         }
 
+        bugs.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+        success.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+        failures.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+        let mut all: Vec<&Report> = reports.iter().collect();
+        all.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+
         ReportCategories {
             bugs,
             success,
             failures,
+            all,
             total: reports.len(),
         }
     }

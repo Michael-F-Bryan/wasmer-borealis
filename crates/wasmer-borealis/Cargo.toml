@@ -29,6 +29,7 @@ shellexpand = "3.1.0"
 tempfile = "3.7.0"
 tokio = { workspace = true }
 tracing = { workspace = true }
+url = "2.4.0"
 uuid = { version = "1.4.1", features = ["v4", "fast-rng"] }
 
 [dev-dependencies]

@@ -20,6 +20,7 @@ pub struct Report {
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(tag = "outcome", rename_all = "kebab-case")]
 pub enum Outcome {
     Completed {
         status: ExitStatus,
