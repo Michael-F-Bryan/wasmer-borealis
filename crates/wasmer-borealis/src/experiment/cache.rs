@@ -258,6 +258,10 @@ async fn download_file(client: &Client, url: &str, dest: impl AsRef<Path>) -> Re
 
 pub fn package_version_dir(dir: &Path, test_case: &TestCase) -> PathBuf {
     dir.join(&test_case.namespace)
-        .join(&test_case.package_name)
+        .join(format!(
+            "{}-{}",
+            test_case.package_name,
+            test_case.package_version.id.inner()
+        ))
         .join(test_case.version())
 }
