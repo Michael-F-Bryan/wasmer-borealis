@@ -3,7 +3,7 @@ use clap::Parser;
 use directories::ProjectDirs;
 use once_cell::sync::Lazy;
 use tracing_subscriber::EnvFilter;
-use wasmer_borealis_cli::{New, Run};
+use wasmer_borealis_cli::{New, Report, Run};
 
 pub static DIRS: Lazy<ProjectDirs> =
     Lazy::new(|| ProjectDirs::from("io", "wasmer", "borealis").unwrap());
@@ -16,6 +16,7 @@ fn main() -> Result<(), Error> {
     match cmd {
         Cmd::Run(r) => r.execute(),
         Cmd::New(n) => n.execute(),
+        Cmd::Report(r) => r.execute(),
     }
 }
 
@@ -34,6 +35,8 @@ enum Cmd {
     New(New),
     /// Run an experiment.
     Run(Run),
+    /// Generate a report from an experiment's results.
+    Report(Report),
 }
 
 /// Initialize logging.

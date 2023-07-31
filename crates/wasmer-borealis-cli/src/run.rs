@@ -10,6 +10,8 @@ pub struct Run {
     registry: String,
     #[clap(long)]
     cache: Option<PathBuf>,
+    #[clap(short, long)]
+    output: Option<PathBuf>,
     /// The experiment to run.
     experiment: PathBuf,
 }
@@ -24,12 +26,17 @@ impl Run {
 
         let url = format!("https://registry.{}/graphql", self.registry);
 
-        let results = ExperimentBuilder::new(experiment)
-            .with_endpoint(url)
-            .run()?;
+        let mut builder = ExperimentBuilder::new(experiment).with_endpoint(url);
+
+        if let Some(output) = self.output {
+            builder = builder.with_experiment_dir(output);
+        }
+
+        let results = builder.run()?;
 
         let stdout = std::io::stdout();
         wasmer_borealis::render::text(&results, &mut stdout.lock())?;
+        println!("Experiment dir: {}", results.experiment_dir.display());
 
         Ok(())
     }

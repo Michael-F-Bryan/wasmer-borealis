@@ -20,6 +20,7 @@ directories = "5"
 futures = "0.3.28"
 indexmap = { version = "1", features = ["serde"] }
 once_cell = "1"
+open = "5.0.0"
 reqwest = { workspace = true }
 semver = { version = "1", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
