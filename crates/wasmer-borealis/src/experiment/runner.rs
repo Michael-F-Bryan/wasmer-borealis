@@ -156,15 +156,15 @@ async fn setup(
         .context("Unable to clean the working dir")?;
 
     let tarball_path = working_dir.join("package.tar.gz");
-    tokio::fs::symlink(&assets.tarball, &tarball_path)
+    tokio::fs::copy(&assets.tarball, &tarball_path)
         .await
-        .context("Unable to create the tarball symlink")?;
+        .context("Unable to copy the tarball into place")?;
 
     let webc_path = working_dir.join("package.webc");
     if let Some(webc) = &assets.webc {
-        tokio::fs::symlink(webc, &webc_path)
+        tokio::fs::copy(webc, &webc_path)
             .await
-            .context("Unable to create the webc symlink")?;
+            .context("Unable to copy the webc into place")?;
     }
 
     let env = Env::new(working_dir.clone(), test_case);
