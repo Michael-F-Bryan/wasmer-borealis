@@ -19,12 +19,14 @@ use crate::{
 pub(crate) struct Runner {
     experiment: Arc<Experiment>,
     semaphore: Arc<Semaphore>,
+    base_dir: PathBuf,
 }
 
 impl Runner {
-    pub(crate) fn new(experiment: Arc<Experiment>) -> Self {
+    pub(crate) fn new(experiment: Arc<Experiment>, base_dir: PathBuf) -> Self {
         Runner {
             experiment,
+            base_dir,
             semaphore: Arc::new(Semaphore::new(
                 std::thread::available_parallelism()
                     .unwrap_or(NonZeroUsize::new(4).unwrap())
@@ -51,9 +53,8 @@ impl Handler<BeginTest> for Runner {
     fn handle(&mut self, msg: BeginTest, _ctx: &mut Self::Context) -> Self::Result {
         let BeginTest { test_case, assets } = msg;
 
-        let base_dir = crate::DIRS
-            .data_local_dir()
-            .join("experiments")
+        let base_dir = self
+            .base_dir
             .join(&test_case.namespace)
             .join(&test_case.package_name)
             .join(test_case.version());
@@ -96,7 +97,7 @@ async fn run_experiment(
         }
     };
 
-    tracing::debug!(?cmd, "Invoking wasmer CLI");
+    tracing::debug!(cmd=?cmd.as_std(), "Invoking wasmer CLI");
     let start = Instant::now();
 
     let outcome = match cmd.status().await {

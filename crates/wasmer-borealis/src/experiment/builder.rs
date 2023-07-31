@@ -25,6 +25,7 @@ pub struct ExperimentBuilder {
     cache_dir: Option<PathBuf>,
     client: Option<Client>,
     endpoint: String,
+    experiment_dir: Option<PathBuf>,
 }
 
 impl ExperimentBuilder {
@@ -36,6 +37,7 @@ impl ExperimentBuilder {
             cache_dir: None,
             client: None,
             endpoint: PRODUCTION_ENDPOINT.to_string(),
+            experiment_dir: None,
         }
     }
 
@@ -67,6 +69,13 @@ impl ExperimentBuilder {
         }
     }
 
+    pub fn experiment_dir(self, experiment_dir: impl Into<PathBuf>) -> Self {
+        ExperimentBuilder {
+            experiment_dir: Some(experiment_dir.into()),
+            ..self
+        }
+    }
+
     pub fn run(self) -> Result<Results, Error> {
         let ExperimentBuilder {
             experiment,
@@ -75,10 +84,16 @@ impl ExperimentBuilder {
             cache_dir,
             client,
             endpoint,
+            experiment_dir,
         } = self;
 
         let client = client.unwrap_or_default();
         let cache_dir = cache_dir.unwrap_or_else(|| crate::DIRS.cache_dir().to_path_buf());
+        let experiment_dir = experiment_dir.unwrap_or_else(|| {
+            crate::DIRS
+                .data_local_dir()
+                .join(uuid::Uuid::new_v4().to_string())
+        });
 
         let system = match runtime {
             Some(rt) => System::with_tokio_rt(rt),
@@ -90,8 +105,17 @@ impl ExperimentBuilder {
             let cache = Cache::new(cache_dir, client.clone(), progress.recipient()).start();
             let orchestrator = Orchestrator::new(cache, client, endpoint).start();
 
-            orchestrator.send(BeginExperiment { experiment }).await
+            orchestrator
+                .send(BeginExperiment {
+                    experiment,
+                    base_dir: experiment_dir.clone(),
+                })
+                .await
         })?;
+
+        let report = crate::render::html(&results)?;
+        let reports_html = experiment_dir.join("report.html");
+        std::fs::write(reports_html, report)?;
 
         Ok(results)
     }
@@ -104,6 +128,7 @@ impl Debug for ExperimentBuilder {
             runtime: _,
             progress,
             cache_dir,
+            experiment_dir,
             client,
             endpoint,
         } = self;
@@ -112,6 +137,7 @@ impl Debug for ExperimentBuilder {
             .field("experiment", experiment)
             .field("progress", progress)
             .field("cache_dir", cache_dir)
+            .field("experiment_dir", experiment_dir)
             .field("client", client)
             .field("endpoint", endpoint)
             .finish_non_exhaustive()

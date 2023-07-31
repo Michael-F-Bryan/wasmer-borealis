@@ -23,7 +23,7 @@ fn main() -> Result<(), anyhow::Error> {
 #[clap(about, version, author)]
 struct Args {
     #[clap(flatten)]
-    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::WarnLevel>,
     #[clap(subcommand)]
     cmd: Cmd,
 }

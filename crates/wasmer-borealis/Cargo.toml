@@ -28,6 +28,7 @@ shellexpand = "3.1.0"
 tempfile = "3.7.0"
 tokio = { workspace = true }
 tracing = { workspace = true }
+uuid = { version = "1.4.1", features = ["v4", "fast-rng"] }
 
 [dev-dependencies]
 schemars = { version = "0.8.12", features = ["indexmap1"] }

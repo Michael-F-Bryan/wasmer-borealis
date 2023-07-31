@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::PathBuf, sync::Arc, time::Instant};
 
 use actix::{Actor, Addr, Context, Handler, ResponseFuture};
 use anyhow::Error;
@@ -41,6 +41,8 @@ impl Actor for Orchestrator {
 #[rtype(result = "Results")]
 pub struct BeginExperiment {
     pub experiment: Arc<Experiment>,
+    /// The directory experiment results should be saved to.
+    pub base_dir: PathBuf,
 }
 
 impl Handler<BeginExperiment> for Orchestrator {
@@ -51,13 +53,17 @@ impl Handler<BeginExperiment> for Orchestrator {
         msg: BeginExperiment,
         _ctx: &mut Self::Context,
     ) -> actix::ResponseFuture<Results> {
-        let BeginExperiment { experiment } = msg;
+        let BeginExperiment {
+            experiment,
+            base_dir,
+        } = msg;
+        let start = Instant::now();
 
         let (sender, receiver) = futures::channel::mpsc::channel(1);
 
         let cache = self.cache.clone();
         let wapm = Wapm::new(self.client.clone(), self.endpoint.clone()).start();
-        let runner = Runner::new(experiment.clone()).start();
+        let runner = Runner::new(experiment.clone(), base_dir.join("experiments")).start();
 
         wapm.do_send(FetchTestCases {
             filters: experiment.filters.clone(),
@@ -120,7 +126,9 @@ impl Handler<BeginExperiment> for Orchestrator {
             completed.extend(remaining_reports);
 
             Results {
-                outcomes: completed,
+                reports: completed,
+                total_time: start.elapsed(),
+                experiment_dir: base_dir,
             }
         })
     }

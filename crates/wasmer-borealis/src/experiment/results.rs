@@ -6,12 +6,14 @@ use crate::registry::queries::PackageVersion;
 
 #[derive(Default, Debug)]
 pub struct Results {
-    pub outcomes: Vec<Report>,
+    pub reports: Vec<Report>,
+    pub total_time: Duration,
+    pub experiment_dir: PathBuf,
 }
 
 impl Extend<Report> for Results {
     fn extend<T: IntoIterator<Item = Report>>(&mut self, iter: T) {
-        self.outcomes.extend(iter);
+        self.reports.extend(iter);
     }
 }
 

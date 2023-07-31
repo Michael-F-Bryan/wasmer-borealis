@@ -28,7 +28,8 @@ impl Run {
             .with_endpoint(url)
             .run()?;
 
-        dbg!(results);
+        let stdout = std::io::stdout();
+        wasmer_borealis::render::text(&results, &mut stdout.lock())?;
 
         Ok(())
     }
