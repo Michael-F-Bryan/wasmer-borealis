@@ -4,10 +4,13 @@ use anyhow::{Context, Error};
 
 #[derive(Debug, clap::Parser)]
 pub struct Report {
+    /// Generate a HTML report and save it to this location
     #[clap(long)]
     html: Option<PathBuf>,
+    /// Open the report in the browser (implies --html)
     #[clap(long)]
     open: bool,
+    /// The results.json file generated during an experiment run
     json: PathBuf,
 }
 

@@ -66,11 +66,20 @@ impl<'a> ReportCategories<'a> {
             }
         }
 
-        bugs.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
-        success.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
-        failures.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+        let sort = |items: &mut [&Report]| {
+            items.sort_by_key(|r| {
+                (
+                    r.display_name.as_str(),
+                    std::cmp::Reverse(r.package_version.version.as_str()),
+                )
+            });
+        };
+
         let mut all: Vec<&Report> = reports.iter().collect();
-        all.sort_by_key(|r| (r.display_name.as_str(), r.package_version.version.as_str()));
+        sort(&mut bugs);
+        sort(&mut success);
+        sort(&mut failures);
+        sort(&mut all);
 
         ReportCategories {
             bugs,

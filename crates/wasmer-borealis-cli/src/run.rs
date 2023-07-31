@@ -6,10 +6,10 @@ use wasmer_borealis::{config::Document, experiment::ExperimentBuilder};
 
 #[derive(Parser, Debug)]
 pub struct Run {
+    /// The Wasmer registry to query packages from.
     #[clap(long, default_value = "wasmer.io")]
     registry: String,
-    #[clap(long)]
-    cache: Option<PathBuf>,
+    /// A directory all experiment-related files will be written to.
     #[clap(short, long)]
     output: Option<PathBuf>,
     /// The experiment to run.
