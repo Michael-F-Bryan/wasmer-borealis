@@ -44,8 +44,8 @@ impl Schema {
 static SCHEMA_PATH: Lazy<PathBuf> = Lazy::new(|| {
     crate::project_root()
         .join("crates")
-        .join("wasmer-borealis-cli")
+        .join("wasmer-borealis")
         .join("src")
-        .join("queries")
+        .join("registry")
         .join("schema.graphql")
 });
