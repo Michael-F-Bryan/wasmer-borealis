@@ -10,6 +10,7 @@ env:
   DEFAULT_CRATE_NAME: wasmer_borealis
 
 permissions:
+  contents: read
   pull-requests: write
 
 concurrency:
