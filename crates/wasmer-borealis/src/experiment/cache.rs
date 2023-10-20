@@ -9,6 +9,7 @@ use anyhow::{Context as _, Error};
 use reqwest::Client;
 use tempfile::TempDir;
 use tokio::sync::Semaphore;
+use url::Url;
 
 use crate::experiment::wapm::TestCase;
 
@@ -67,7 +68,7 @@ impl Handler<FetchAssets> for Cache {
 
         Box::pin(async move {
             let _guard = semaphore.acquire().await?;
-            let assets = download(&client, &dir, &test_case, progress).await?;
+            let assets = prepare_assets(&client, &dir, &test_case, progress).await?;
             Ok(AssetsFetched { test_case, assets })
         })
     }
@@ -83,6 +84,8 @@ pub(crate) struct AssetsFetched {
 pub(crate) struct Assets {
     pub tarball: PathBuf,
     pub webc: Option<PathBuf>,
+    /// The total size of the assets on disk.
+    pub total_size: u64,
 }
 
 /// Messages emitted by the [`Cache`] as it downloads a packages.
@@ -93,7 +96,10 @@ pub(crate) enum CacheStatusMessage {
     CacheHit(TestCase),
     CacheMiss {
         test_case: TestCase,
+        /// How long it took to download the test case.
         duration: Duration,
+        /// The amount of data that was downloaded.
+        bytes_downloaded: u64,
     },
 }
 
@@ -102,7 +108,7 @@ pub(crate) enum CacheStatusMessage {
         pkg.name=test_case.package_name.as_str(),
         pkg.version=test_case.version(),
     ))]
-async fn download(
+async fn prepare_assets(
     client: &Client,
     dir: &Path,
     test_case: &TestCase,
@@ -121,15 +127,27 @@ async fn download(
         .with_extension("webc");
 
     if cache_dir.exists() && tarball_path.exists() {
+        let tarball_size = std::fs::metadata(&tarball_path)?.len();
+
+        let assets = match std::fs::metadata(&webc_path) {
+            Ok(webc_meta) => Assets {
+                tarball: tarball_path,
+                webc: Some(webc_path),
+                total_size: tarball_size + webc_meta.len(),
+            },
+            Err(_) => Assets {
+                tarball: tarball_path,
+                webc: None,
+                total_size: tarball_size,
+            },
+        };
+
         tracing::debug!(cache_dir=%cache_dir.display(), "Cache hit!");
         let _ = progress
             .send(CacheStatusMessage::CacheHit(test_case.clone()))
             .await;
 
-        return Ok(Assets {
-            tarball: tarball_path,
-            webc: webc_path.exists().then_some(webc_path),
-        });
+        return Ok(assets);
     }
 
     tracing::debug!(
@@ -143,12 +161,13 @@ async fn download(
     let start = Instant::now();
     let result = do_download(client, dir, &cache_dir, tarball_path, webc_path, test_case).await;
 
-    if result.is_ok() {
+    if let Ok(assets) = &result {
         let duration = start.elapsed();
         let _ = progress
             .send(CacheStatusMessage::CacheMiss {
                 test_case: test_case.clone(),
                 duration,
+                bytes_downloaded: assets.total_size,
             })
             .await;
     }
@@ -170,7 +189,7 @@ async fn do_download(
     let temp = TempDir::new_in(dir).context("Unable to create a temporary directory")?;
 
     // Download our files to a temporary directory
-    download_file(
+    let mut bytes_downloaded = download_file(
         client,
         test_case.tarball_url(),
         temp.path().join(tarball_path.file_name().unwrap()),
@@ -178,7 +197,7 @@ async fn do_download(
     .await
     .with_context(|| format!("Downloading \"{}\" failed", test_case.tarball_url()))?;
     if let Some(url) = test_case.webc_url() {
-        download_file(
+        bytes_downloaded += download_file(
             client,
             url,
             temp.path().join(webc_path.file_name().unwrap()),
@@ -239,17 +258,18 @@ async fn do_download(
             .pirita_download_url
             .is_some()
             .then_some(webc_path),
+        total_size: bytes_downloaded,
     })
 }
 
-#[tracing::instrument(skip_all, fields(url, bytes_read=tracing::field::Empty))]
-async fn download_file(client: &Client, url: &str, dest: impl AsRef<Path>) -> Result<(), Error> {
+#[tracing::instrument(skip_all, fields(url=tracing::field::Empty, bytes_read=tracing::field::Empty))]
+async fn download_file(client: &Client, url: &str, dest: impl AsRef<Path>) -> Result<u64, Error> {
+    let url = Url::parse(url)?;
+    tracing::Span::current().record("url", url.path());
+
     let dest = dest.as_ref();
-    tracing::debug!(
-        dest=%dest.display(),
-        url,
-        "Downloading",
-    );
+    tracing::debug!(dest=%dest.display(), "Downloading");
+
     let payload = client
         .get(url)
         .send()
@@ -261,11 +281,11 @@ async fn download_file(client: &Client, url: &str, dest: impl AsRef<Path>) -> Re
     tracing::Span::current().record("bytes_read", payload.len());
     tracing::debug!("Download complete");
 
-    tokio::fs::write(dest, payload)
+    tokio::fs::write(dest, &payload)
         .await
         .with_context(|| format!("Unable to save to \"{}\"", dest.display()))?;
 
-    Ok(())
+    Ok(payload.len().try_into().unwrap())
 }
 
 pub fn package_version_dir(dir: &Path, test_case: &TestCase) -> PathBuf {

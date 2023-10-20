@@ -16,7 +16,7 @@ impl ProgressMonitor {
 pub trait Progress: Debug {
     fn downloading(&mut self, _test_case: TestCase) {}
     fn cache_hit(&mut self, _test_case: TestCase) {}
-    fn cache_miss(&mut self, _test_case: TestCase, _duration: Duration) {}
+    fn cache_miss(&mut self, _test_case: TestCase, _duration: Duration, _bytes_downloaded: u64) {}
 }
 
 impl Actor for ProgressMonitor {
@@ -33,7 +33,8 @@ impl Handler<CacheStatusMessage> for ProgressMonitor {
             CacheStatusMessage::CacheMiss {
                 test_case,
                 duration,
-            } => self.0.cache_miss(test_case, duration),
+                bytes_downloaded,
+            } => self.0.cache_miss(test_case, duration, bytes_downloaded),
         }
     }
 }
