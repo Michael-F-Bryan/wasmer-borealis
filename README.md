@@ -53,9 +53,15 @@ the `wasmer` namespace.
 }
 ```
 
-Note that the `"$schema"` field isn't required. It's just an annotation to VS
-Code which will let it know the format (technically, the [JSON Schema][schema])
-that a `*.experiment.json` file takes.
+> **Note:** the `"$schema"` field isn't required. It's just an annotation to VS
+> Code which will let it know the format (technically, the [JSON Schema][schema])
+> that a `*.experiment.json` file takes.
+
+> **Warning:** removing the `"filters"` from the `*.experiment.json` file will
+> attempt to run the experiment against *every* package on the registry. This
+> may take a long time, download large amounts of data, and/or fill up your
+> computer's disk.
+
 
 Now, we can run the experiment:
 
