@@ -1,6 +1,6 @@
 # wasmer-borealis
 
-[![Continuous integration](https://github.com/Michael-F-Bryan/wasmer-borealis/workflows/Continuous%20Integration/badge.svg?branch=main)](https://github.com/Michael-F-Bryan/wasmer-borealis/actions)
+[![Continuous Integration](https://github.com/Michael-F-Bryan/wasmer-borealis/actions/workflows/ci.yml/badge.svg)](https://github.com/Michael-F-Bryan/wasmer-borealis/actions/workflows/ci.yml)
 
 ([API Docs][api-docs])
 
