@@ -154,7 +154,7 @@ async fn setup(
         .await
         .context("Unable to create the working dir")?;
 
-    let fixtures_dir = base_dir.join("working");
+    let fixtures_dir = base_dir.join("fixtures");
 
     tokio::fs::create_dir_all(&fixtures_dir)
         .await
@@ -172,7 +172,7 @@ async fn setup(
             .context("Unable to copy the webc into place")?;
     }
 
-    let env = Env::new(out_dir, fixtures_dir, test_case);
+    let env = Env::new(fixtures_dir, out_dir, test_case);
 
     let mut cmd = tokio::process::Command::new("wasmer");
 
@@ -189,7 +189,7 @@ async fn setup(
         .stdin(std::process::Stdio::null())
         .env_clear();
 
-    let whitelisted_vars = ["PATH", "WASMER_DIR"];
+    let whitelisted_vars = ;
 
     for var in whitelisted_vars {
         if let Some(value) = std::env::var_os(var) {
