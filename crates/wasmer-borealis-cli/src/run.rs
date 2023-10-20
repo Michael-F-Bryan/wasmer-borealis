@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use reqwest::{Client, ClientBuilder, Url};
+use reqwest::{header::HeaderMap, Client, ClientBuilder, Url};
 use wasmer_borealis::{config::Document, experiment::ExperimentBuilder};
 
 #[derive(Parser, Debug)]
@@ -48,15 +48,22 @@ impl Run {
     }
 
     fn client(&self) -> Result<Client, Error> {
-        let mut builder = ClientBuilder::new();
+        let builder = ClientBuilder::new();
+        let mut headers = HeaderMap::new();
+
+        headers.insert(
+            reqwest::header::USER_AGENT,
+            crate::USER_AGENT.parse().unwrap(),
+        );
 
         if let Some(token) = self.token.as_deref() {
             let auth_header = format!("bearer {token}").parse()?;
-            let headers = [(reqwest::header::AUTHORIZATION, auth_header)];
-            builder = builder.default_headers(headers.into_iter().collect());
+            headers.append(reqwest::header::AUTHORIZATION, auth_header);
         }
 
-        let client = builder.build()?;
+        let client = builder
+            .default_headers(headers.into_iter().collect())
+            .build()?;
 
         Ok(client)
     }
