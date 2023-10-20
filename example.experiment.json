@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/Michael-F-Bryan/wasmer-borealis/tree/main/experiment.schema.json",
+  "package": "wasmer/wapm2pirita",
+  "args": [
+    "convert",
+    "/app/${TARBALL_FILENAME}",
+    "/app/${PKG_NAME}.webc"
+  ],
+  "wasmer": {
+    "args": [
+      "--mapdir=/app:${WORKING_DIR}"
+    ]
+  }
+}
