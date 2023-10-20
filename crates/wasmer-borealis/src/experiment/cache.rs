@@ -132,6 +132,14 @@ async fn download(
         });
     }
 
+    tracing::debug!(
+        cache_dir.path = %cache_dir.display(),
+        cache_dir.exists = cache_dir.exists(),
+        tarball.path = %tarball_path.display(),
+        tarball.exists = tarball_path.exists(),
+        "Cache miss",
+    );
+
     let start = Instant::now();
     let result = do_download(client, dir, &cache_dir, tarball_path, webc_path, test_case).await;
 
@@ -261,11 +269,8 @@ async fn download_file(client: &Client, url: &str, dest: impl AsRef<Path>) -> Re
 }
 
 pub fn package_version_dir(dir: &Path, test_case: &TestCase) -> PathBuf {
-    dir.join(&test_case.namespace)
-        .join(format!(
-            "{}-{}",
-            test_case.package_name,
-            test_case.package_version.id.inner()
-        ))
+    dir.join(&test_case.registry)
+        .join(&test_case.namespace)
+        .join(&test_case.package_name)
         .join(test_case.version())
 }

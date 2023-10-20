@@ -31,7 +31,7 @@ impl Run {
 
         let client = self.client()?;
         let mut builder = ExperimentBuilder::new(experiment)
-            .with_endpoint(url)
+            .with_endpoint(url)?
             .with_client(client);
 
         if let Some(output) = self.output {

@@ -4,6 +4,7 @@ use actix::{Actor, Addr, Context, Handler, ResponseFuture};
 use anyhow::Error;
 use futures::{stream::FuturesUnordered, StreamExt};
 use reqwest::Client;
+use url::Url;
 
 use crate::{
     config::Experiment,
@@ -20,11 +21,11 @@ use crate::{
 pub(crate) struct Orchestrator {
     cache: Addr<Cache>,
     client: Client,
-    endpoint: String,
+    endpoint: Url,
 }
 
 impl Orchestrator {
-    pub fn new(cache: Addr<Cache>, client: Client, endpoint: String) -> Self {
+    pub fn new(cache: Addr<Cache>, client: Client, endpoint: Url) -> Self {
         Orchestrator {
             cache,
             client,

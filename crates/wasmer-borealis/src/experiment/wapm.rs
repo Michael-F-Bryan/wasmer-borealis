@@ -2,6 +2,7 @@ use actix::{Actor, AsyncContext, Context, Handler, WrapFuture};
 use futures::{channel::mpsc::Sender, SinkExt, Stream, StreamExt};
 use reqwest::Client;
 use tracing::Instrument;
+use url::Url;
 
 use crate::{
     config::Filters,
@@ -11,7 +12,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub(crate) struct Wapm {
     client: Client,
-    endpoint: String,
+    endpoint: Url,
 }
 
 impl Wapm {
@@ -21,7 +22,7 @@ impl Wapm {
     ///
     /// If you want access to all packages, you will need to make sure the
     /// [`Client`] has been configured to send the right `Authorization` header.
-    pub fn new(client: Client, endpoint: String) -> Self {
+    pub fn new(client: Client, endpoint: Url) -> Self {
         Wapm { client, endpoint }
     }
 }
@@ -78,7 +79,7 @@ impl Handler<FetchTestCases> for Wapm {
 fn discover_test_cases(
     client: Client,
     filters: Filters,
-    endpoint: String,
+    endpoint: Url,
 ) -> impl Stream<Item = Vec<TestCase>> {
     let (mut sender, receiver) = futures::channel::mpsc::channel(1);
     let Filters {
@@ -88,9 +89,13 @@ fn discover_test_cases(
         users,
     } = filters;
 
+    let hostname = endpoint.host_str().unwrap_or("unknown").to_string();
+
     if namespaces.is_empty() && users.is_empty() {
         tokio::spawn(async move {
-            if let Err(e) = crate::registry::all_packages(&client, &endpoint, &mut sender).await {
+            if let Err(e) =
+                crate::registry::all_packages(&client, endpoint.as_str(), &mut sender).await
+            {
                 tracing::error!(error = &*e, "Unable to list all packages");
             }
         });
@@ -99,7 +104,7 @@ fn discover_test_cases(
             for namespace in &namespaces {
                 if let Err(e) = crate::registry::all_packages_in_namespace(
                     &client,
-                    &endpoint,
+                    endpoint.as_str(),
                     namespace,
                     &mut sender,
                 )
@@ -114,9 +119,13 @@ fn discover_test_cases(
             }
 
             for user in &users {
-                if let Err(e) =
-                    crate::registry::all_packages_by_user(&client, &endpoint, user, &mut sender)
-                        .await
+                if let Err(e) = crate::registry::all_packages_by_user(
+                    &client,
+                    endpoint.as_str(),
+                    user,
+                    &mut sender,
+                )
+                .await
                 {
                     tracing::error!(
                         error = &*e,
@@ -133,9 +142,9 @@ fn discover_test_cases(
             .filter(|pkg| blacklist.is_empty() || !blacklist.contains(&pkg.display_name))
             .flat_map(|pkg| {
                 if include_every_version {
-                    TestCase::all(pkg)
+                    TestCase::all(&hostname, pkg)
                 } else {
-                    TestCase::latest(pkg)
+                    TestCase::latest(&hostname, pkg)
                 }
             })
             .collect()
@@ -145,30 +154,52 @@ fn discover_test_cases(
 /// A package version that will be included in the experiment.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct TestCase {
+    /// The hostname of the registry this [`TestCase`] came from.
+    pub registry: String,
+    /// The namespace or user that owns the package.
     pub namespace: String,
+    /// The package's name.
     pub package_name: String,
     pub package_version: PackageVersion,
 }
 
 impl TestCase {
-    fn all(pkg: Package) -> Vec<TestCase> {
+    fn all(registry_hostname: &str, pkg: Package) -> Vec<TestCase> {
         pkg.versions
             .into_iter()
             .flatten()
-            .map(|version| TestCase::new(pkg.namespace.clone(), pkg.package_name.clone(), version))
+            .map(|version| {
+                TestCase::new(
+                    registry_hostname,
+                    pkg.namespace.clone(),
+                    pkg.package_name.clone(),
+                    version,
+                )
+            })
             .collect()
     }
 
-    fn latest(pkg: Package) -> Vec<TestCase> {
+    fn latest(registry: &str, pkg: Package) -> Vec<TestCase> {
         if let Some(version) = pkg.last_version {
-            vec![TestCase::new(pkg.namespace, pkg.package_name, version)]
+            vec![TestCase::new(
+                registry,
+                pkg.namespace,
+                pkg.package_name,
+                version,
+            )]
         } else {
             Vec::new()
         }
     }
 
-    fn new(namespace: String, package_name: String, package_version: PackageVersion) -> Self {
+    fn new(
+        registry_hostname: &str,
+        namespace: String,
+        package_name: String,
+        package_version: PackageVersion,
+    ) -> Self {
         TestCase {
+            registry: registry_hostname.to_string(),
             namespace,
             package_name,
             package_version,

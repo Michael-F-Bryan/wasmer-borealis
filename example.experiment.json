@@ -3,12 +3,13 @@
   "package": "wasmer/wapm2pirita",
   "args": [
     "convert",
-    "/app/${TARBALL_FILENAME}",
-    "/app/${PKG_NAME}.webc"
+    "/files/${TARBALL_FILENAME}",
+    "/out/${PKG_NAME}.webc"
   ],
   "wasmer": {
     "args": [
-      "--mapdir=/app:${WORKING_DIR}"
+      "--mapdir=/files:${FIXTURES_DIR}",
+      "--mapdir=/out:${OUT_DIR}"
     ]
   }
 }

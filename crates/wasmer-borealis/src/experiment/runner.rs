@@ -149,25 +149,30 @@ async fn setup(
     let json = serde_json::to_string_pretty(test_case)?;
     tokio::fs::write(test_case_json, json).await?;
 
-    let working_dir = base_dir.join("working");
-
-    tokio::fs::create_dir_all(&working_dir)
+    let out_dir = base_dir.join("out");
+    tokio::fs::create_dir_all(&out_dir)
         .await
-        .context("Unable to clean the working dir")?;
+        .context("Unable to create the working dir")?;
 
-    let tarball_path = working_dir.join("package.tar.gz");
+    let fixtures_dir = base_dir.join("working");
+
+    tokio::fs::create_dir_all(&fixtures_dir)
+        .await
+        .context("Unable to create the working dir")?;
+
+    let tarball_path = fixtures_dir.join("package.tar.gz");
     tokio::fs::copy(&assets.tarball, &tarball_path)
         .await
         .context("Unable to copy the tarball into place")?;
 
-    let webc_path = working_dir.join("package.webc");
+    let webc_path = fixtures_dir.join("package.webc");
     if let Some(webc) = &assets.webc {
         tokio::fs::copy(webc, &webc_path)
             .await
             .context("Unable to copy the webc into place")?;
     }
 
-    let env = Env::new(working_dir.clone(), test_case);
+    let env = Env::new(out_dir, fixtures_dir, test_case);
 
     let mut cmd = tokio::process::Command::new("wasmer");
 
@@ -226,7 +231,7 @@ struct Env {
 }
 
 impl Env {
-    fn new(working_dir: PathBuf, test_case: &TestCase) -> Self {
+    fn new(fixtures_dir: PathBuf, out_dir: PathBuf, test_case: &TestCase) -> Self {
         let mut common: HashMap<&str, String> = HashMap::new();
 
         common.insert("PKG_NAMESPACE", test_case.namespace.clone());
@@ -238,18 +243,19 @@ impl Env {
 
         host.insert(
             "TARBALL_PATH",
-            working_dir.join("package.tar.gz").display().to_string(),
+            fixtures_dir.join("package.tar.gz").display().to_string(),
         );
 
         if test_case.webc_url().is_some() {
             host.insert(
                 "WEBC_PATH",
-                working_dir.join("package.webc").display().to_string(),
+                fixtures_dir.join("package.webc").display().to_string(),
             );
             common.insert("WEBC_FILENAME", "package.webc".to_string());
         }
 
-        host.insert("WORKING_DIR", working_dir.display().to_string());
+        host.insert("OUT_DIR", out_dir.display().to_string());
+        host.insert("FIXTURES_DIR", fixtures_dir.display().to_string());
 
         Env { common, host }
     }

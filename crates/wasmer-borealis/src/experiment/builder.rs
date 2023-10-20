@@ -5,6 +5,7 @@ use anyhow::Error;
 use reqwest::Client;
 use tokio::runtime::Runtime;
 use tracing::Instrument;
+use url::Url;
 
 use crate::{
     config::Experiment,
@@ -25,7 +26,7 @@ pub struct ExperimentBuilder {
     progress: Box<dyn Progress>,
     cache_dir: Option<PathBuf>,
     client: Option<Client>,
-    endpoint: String,
+    endpoint: Url,
     experiment_dir: Option<PathBuf>,
 }
 
@@ -37,7 +38,7 @@ impl ExperimentBuilder {
             progress: Box::new(Noop),
             cache_dir: None,
             client: None,
-            endpoint: PRODUCTION_ENDPOINT.to_string(),
+            endpoint: PRODUCTION_ENDPOINT.parse().unwrap(),
             experiment_dir: None,
         }
     }
@@ -63,11 +64,9 @@ impl ExperimentBuilder {
         }
     }
 
-    pub fn with_endpoint(self, endpoint: impl Into<String>) -> Self {
-        ExperimentBuilder {
-            endpoint: endpoint.into(),
-            ..self
-        }
+    pub fn with_endpoint(self, endpoint: impl AsRef<str>) -> Result<Self, url::ParseError> {
+        let endpoint = endpoint.as_ref().parse()?;
+        Ok(ExperimentBuilder { endpoint, ..self })
     }
 
     pub fn with_experiment_dir(self, experiment_dir: impl Into<PathBuf>) -> Self {
