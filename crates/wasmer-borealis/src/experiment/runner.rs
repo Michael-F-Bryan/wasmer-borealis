@@ -189,7 +189,7 @@ async fn setup(
         .stdin(std::process::Stdio::null())
         .env_clear();
 
-    let whitelisted_vars = ;
+    let whitelisted_vars = ["PATH", "WASMER_DIR"];
 
     for var in whitelisted_vars {
         if let Some(value) = std::env::var_os(var) {
