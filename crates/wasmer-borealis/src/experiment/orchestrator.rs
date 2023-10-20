@@ -59,6 +59,8 @@ impl Handler<BeginExperiment> for Orchestrator {
         } = msg;
         let start = Instant::now();
 
+        tracing::info!(?base_dir, "Experiment started");
+
         let (sender, receiver) = futures::channel::mpsc::channel(1);
 
         let cache = self.cache.clone();

@@ -15,6 +15,12 @@ pub(crate) struct Wapm {
 }
 
 impl Wapm {
+    /// Initialize the [`Wapm`] actor.
+    ///
+    /// # Authentication
+    ///
+    /// If you want access to all packages, you will need to make sure the
+    /// [`Client`] has been configured to send the right `Authorization` header.
     pub fn new(client: Client, endpoint: String) -> Self {
         Wapm { client, endpoint }
     }
@@ -83,7 +89,11 @@ fn discover_test_cases(
     } = filters;
 
     if namespaces.is_empty() && users.is_empty() {
-        todo!("Fetch all packages");
+        tokio::spawn(async move {
+            if let Err(e) = crate::registry::all_packages(&client, &endpoint, &mut sender).await {
+                tracing::error!(error = &*e, "Unable to list all packages");
+            }
+        });
     } else {
         tokio::spawn(async move {
             for namespace in &namespaces {

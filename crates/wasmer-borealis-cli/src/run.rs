@@ -2,14 +2,16 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use reqwest::Url;
+use reqwest::{Client, ClientBuilder, Url};
 use wasmer_borealis::{config::Document, experiment::ExperimentBuilder};
 
 #[derive(Parser, Debug)]
 pub struct Run {
     /// The Wasmer registry to query packages from.
-    #[clap(long, default_value = "wasmer.io")]
+    #[clap(long, default_value = "wasmer.io", env = "WASMER_REGISTRY")]
     registry: String,
+    #[clap(long, short, env = "WASMER_TOKEN")]
+    token: Option<String>,
     /// A directory all experiment-related files will be written to.
     #[clap(short, long)]
     output: Option<PathBuf>,
@@ -27,7 +29,10 @@ impl Run {
 
         let url = format_graphql(&self.registry);
 
-        let mut builder = ExperimentBuilder::new(experiment).with_endpoint(url);
+        let client = self.client()?;
+        let mut builder = ExperimentBuilder::new(experiment)
+            .with_endpoint(url)
+            .with_client(client);
 
         if let Some(output) = self.output {
             builder = builder.with_experiment_dir(output);
@@ -40,6 +45,20 @@ impl Run {
         println!("Experiment dir: {}", results.experiment_dir.display());
 
         Ok(())
+    }
+
+    fn client(&self) -> Result<Client, Error> {
+        let mut builder = ClientBuilder::new();
+
+        if let Some(token) = self.token.as_deref() {
+            let auth_header = format!("bearer {token}").parse()?;
+            let headers = [(reqwest::header::AUTHORIZATION, auth_header)];
+            builder = builder.default_headers(headers.into_iter().collect());
+        }
+
+        let client = builder.build()?;
+
+        Ok(client)
     }
 }
 

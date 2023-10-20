@@ -1,9 +1,51 @@
 use anyhow::{Context, Error};
-use cynic::{GraphQlResponse, Operation, QueryBuilder};
+use cynic::{GraphQlError, GraphQlResponse, Operation, QueryBuilder};
 use futures::{Sink, SinkExt};
 use reqwest::Client;
 
 use crate::registry::queries::Variables;
+
+#[tracing::instrument(skip_all)]
+pub async fn all_packages<S>(
+    client: &Client,
+    graphql_endpoint: &str,
+    mut dest: S,
+) -> Result<(), Error>
+where
+    S: Sink<Vec<queries::Package>> + Unpin,
+    S::Error: std::error::Error + Send + Sync + 'static,
+{
+    let op = queries::GetAllPackages::build(());
+
+    let response: GraphQlResponse<queries::GetAllPackages> = client
+        .post(graphql_endpoint)
+        .header("Content-Type", "application/json")
+        .json(&op)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    if let Some(errors) = response.errors {
+        return Err(aggregate_errors(errors));
+    }
+
+    let packages: Vec<_> = response
+        .data
+        .and_then(|g| g.packages)
+        .into_iter()
+        .flat_map(|p| p.edges)
+        .flatten()
+        .flat_map(|p| p.node)
+        .collect();
+
+    tracing::debug!(count = packages.len(), "Listed all packages");
+
+    dest.send(packages).await?;
+
+    Ok(())
+}
 
 #[tracing::instrument(skip_all, fields(username))]
 pub async fn all_packages_by_user<S>(
@@ -101,7 +143,7 @@ where
 
         if let Some(errors) = response.errors {
             if !errors.is_empty() {
-                todo!("Handle errors: {errors:?}");
+                return Err(aggregate_errors(errors));
             }
         }
 
@@ -125,13 +167,16 @@ where
     Ok(())
 }
 
+fn aggregate_errors(_errors: Vec<GraphQlError>) -> Error {
+    todo!()
+}
+
 #[cynic::schema_for_derives(
     file = "src/registry/schema.graphql",
     module = "crate::registry::schema"
 )]
 #[allow(unused)]
 pub mod queries {
-
     #[derive(cynic::QueryVariables, Debug, Clone)]
     pub struct Variables<'a> {
         pub name: &'a str,
@@ -200,6 +245,12 @@ pub mod queries {
     pub struct PackageDistribution {
         pub download_url: String,
         pub pirita_download_url: Option<String>,
+    }
+
+    #[derive(cynic::QueryFragment, Debug, Clone)]
+    #[cynic(graphql_type = "Query")]
+    pub struct GetAllPackages {
+        pub packages: Option<PackageConnection>,
     }
 }
 

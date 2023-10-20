@@ -178,6 +178,9 @@ type Namespace implements Node & PackageOwner & Owner {
   description: String!
   avatar: String!
   avatarUpdatedAt: DateTime
+  twitterHandle: String
+  githubHandle: String
+  websiteUrl: String
   createdAt: DateTime!
   updatedAt: DateTime!
   maintainerInvites(offset: Int, before: String, after: String, first: Int, last: Int): NamespaceCollaboratorInviteConnection!
@@ -191,6 +194,9 @@ type Namespace implements Node & PackageOwner & Owner {
   publicActivity(before: String, after: String, first: Int, last: Int): ActivityEventConnection!
   pendingInvites(before: String, after: String, first: Int, last: Int): NamespaceCollaboratorInviteConnection!
   viewerHasRole(role: GrapheneRole!): Boolean!
+
+  """Whether the current user is invited to the namespace"""
+  viewerIsInvited: Boolean!
   packageTransfersIncoming(before: String, after: String, first: Int, last: Int): PackageTransferRequestConnection!
   usageMetrics(forRange: MetricRange!, variant: MetricType!): [UsageMetric]!
 }
@@ -355,6 +361,9 @@ type Package implements Likeable & Node & PackageOwner {
   viewerIsWatching: Boolean!
   showDeployButton: Boolean!
   similarPackageVersions(before: String, after: String, first: Int, last: Int): PackageSearchConnection!
+
+  """Whether the current user is invited to the package"""
+  viewerIsInvited: Boolean!
 }
 
 interface Likeable {
@@ -1648,13 +1657,29 @@ type BlogPost implements Node {
   owner: User
   body: String!
   publishDate: DateTime
+  theme: BlogBlogPostThemeChoices!
   url: String!
   coverImageUrl: String
+  opengraphImageUrl: String
   tagline: String!
   relatedArticles: [BlogPost!]
   updatedAt: DateTime!
   tags: [BlogPostTag!]
   editUrl: String
+}
+
+enum BlogBlogPostThemeChoices {
+  """Green"""
+  GREEN
+
+  """Purple"""
+  PURPLE
+
+  """Orange"""
+  ORANGE
+
+  """Blue"""
+  BLUE
 }
 
 type BlogPostTag implements Node {
@@ -2600,6 +2625,19 @@ input UpdateNamespaceInput {
 
   """The namespace avatar"""
   avatar: String
+
+  """
+  The user Twitter (it can be the url, or the handle with or without the @)
+  """
+  twitter: String
+
+  """
+  The user Github (it can be the url, or the handle with or without the @)
+  """
+  github: String
+
+  """The user website (it must be a valid url)"""
+  websiteUrl: String
   clientMutationId: String
 }
 
