@@ -11,5 +11,13 @@
       "--mapdir=/files:${FIXTURES_DIR}",
       "--mapdir=/out:${OUT_DIR}"
     ]
+  },
+  "filters": {
+    "users": [
+      "michael-f-bryan"
+    ],
+    "namespaces": [
+      "wasmer"
+    ]
   }
 }

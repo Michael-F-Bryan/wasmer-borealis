@@ -61,9 +61,7 @@ impl Run {
             headers.append(reqwest::header::AUTHORIZATION, auth_header);
         }
 
-        let client = builder
-            .default_headers(headers.into_iter().collect())
-            .build()?;
+        let client = builder.default_headers(headers).build()?;
 
         Ok(client)
     }
