@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["enum_derive","enum_derive_impl"],"struct":["EnumDeriveInput"]};

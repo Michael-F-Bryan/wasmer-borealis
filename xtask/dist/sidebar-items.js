@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["BINARIES","PROJECT_NAME","STATIC_FILES"],"fn":["host_triple"],"static":["DIST_DIR"],"struct":["Dist","StaticFile"]};

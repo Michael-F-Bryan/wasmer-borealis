@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["main","test"],"derive":["Message","MessageResponse"]};

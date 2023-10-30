@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Counter counts recurrent elements of iterables. It is based on the Python implementation."><title>counter - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="counter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../counter/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../counter/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2 class="location"><a href="#">Crate counter</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 0.5.7</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#structs">Structs</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">counter</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/counter/lib.rs.html#1-1733">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Counter counts recurrent elements of iterables. It is based on <a href="https://docs.python.org/3/library/collections.html#collections.Counter">the Python
+implementation</a>.</p>
+<p>The struct <a href="struct.Counter.html"><code>Counter</code></a> is the entry-point type for this module.</p>
+<h2 id="math-underpinnings"><a href="#math-underpinnings">Math Underpinnings</a></h2>
+<p>Mathematically, a <code>Counter</code> implements a hash-based version of a <a href="https://en.wikipedia.org/wiki/Set_(abstract_data_type)#Multiset">multiset</a>,
+or bag. This is simply an extension of the notion of a set to the idea that
+we care not only about whether an entity exists within the set, but the number
+of occurrences within the set. Normal set operations such as intersection,
+union, etc. are of course still supported.</p>
+<h2 id="examples"><a href="#examples">Examples</a></h2><h3 id="just-count-an-iterable"><a href="#just-count-an-iterable">Just count an iterable</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>counter::Counter;
+<span class="kw">let </span>char_counts = <span class="string">&quot;barefoot&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>counts_counts = char_counts.values().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();</code></pre></div>
+<h3 id="update-a-count"><a href="#update-a-count">Update a count</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>counts = <span class="string">&quot;aaa&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+counts[<span class="kw-2">&amp;</span><span class="string">&#39;a&#39;</span>] += <span class="number">1</span>;
+counts[<span class="kw-2">&amp;</span><span class="string">&#39;b&#39;</span>] += <span class="number">1</span>;</code></pre></div>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>counts = <span class="string">&quot;able babble table babble rabble table able fable scrabble&quot;
+    </span>.split_whitespace().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="comment">// add or subtract an iterable of the same type
+</span>counts += <span class="string">&quot;cain and abel fable table cable&quot;</span>.split_whitespace();
+<span class="comment">// or add or subtract from another Counter of the same type
+</span><span class="kw">let </span>other_counts = <span class="string">&quot;scrabble cabbie fable babble&quot;
+    </span>.split_whitespace().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>difference = counts - other_counts;</code></pre></div>
+<p>Extend a <code>Counter</code> with another <code>Counter</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>counter = <span class="string">&quot;abbccc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>another = <span class="string">&quot;bccddd&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+counter.extend(<span class="kw-2">&amp;</span>another);
+<span class="kw">let </span>expect = [(<span class="string">&#39;a&#39;</span>, <span class="number">1</span>), (<span class="string">&#39;b&#39;</span>, <span class="number">3</span>), (<span class="string">&#39;c&#39;</span>, <span class="number">5</span>), (<span class="string">&#39;d&#39;</span>, <span class="number">3</span>)].iter()
+    .cloned().collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(counter.into_map(), expect);</code></pre></div>
+<h3 id="get-items-with-keys"><a href="#get-items-with-keys">Get items with keys</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counts = <span class="string">&quot;aaa&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(counts[<span class="kw-2">&amp;</span><span class="string">&#39;a&#39;</span>], <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(counts[<span class="kw-2">&amp;</span><span class="string">&#39;b&#39;</span>], <span class="number">0</span>);</code></pre></div>
+<h3 id="get-the-most-common-items"><a href="#get-the-most-common-items">Get the most common items</a></h3>
+<p><a href="struct.Counter.html#method.most_common_ordered" title="method counter::Counter::most_common_ordered"><code>most_common_ordered()</code></a> uses the natural ordering of keys which are <a href="https://doc.rust-lang.org/stable/std/cmp/trait.Ord.html"><code>Ord</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>by_common = <span class="string">&quot;eaddbbccc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;().most_common_ordered();
+<span class="kw">let </span>expected = <span class="macro">vec!</span>[(<span class="string">&#39;c&#39;</span>, <span class="number">3</span>), (<span class="string">&#39;b&#39;</span>, <span class="number">2</span>), (<span class="string">&#39;d&#39;</span>, <span class="number">2</span>), (<span class="string">&#39;a&#39;</span>, <span class="number">1</span>), (<span class="string">&#39;e&#39;</span>, <span class="number">1</span>)];
+<span class="macro">assert!</span>(by_common == expected);</code></pre></div>
+<p><a href="struct.Counter.html#method.k_most_common_ordered" title="method counter::Counter::k_most_common_ordered"><code>k_most_common_ordered()</code></a> takes an argument <code>k</code> of type <code>usize</code> and returns the top <code>k</code> most
+common items.  This is functionally equivalent to calling <code>most_common_ordered()</code> and then
+truncating the result to length <code>k</code>.  However, if <code>k</code> is smaller than the length of the counter
+then <code>k_most_common_ordered()</code> can be more efficient, often much more so.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>by_common = <span class="string">&quot;eaddbbccc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;().k_most_common_ordered(<span class="number">2</span>);
+<span class="kw">let </span>expected = <span class="macro">vec!</span>[(<span class="string">&#39;c&#39;</span>, <span class="number">3</span>), (<span class="string">&#39;b&#39;</span>, <span class="number">2</span>)];
+<span class="macro">assert!</span>(by_common == expected);</code></pre></div>
+<h3 id="get-the-most-common-items-using-your-own-ordering"><a href="#get-the-most-common-items-using-your-own-ordering">Get the most common items using your own ordering</a></h3>
+<p>For example, here we break ties reverse alphabetically.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counter = <span class="string">&quot;eaddbbccc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>by_common = counter.most_common_tiebreaker(|<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>b| b.cmp(<span class="kw-2">&amp;</span>a));
+<span class="kw">let </span>expected = <span class="macro">vec!</span>[(<span class="string">&#39;c&#39;</span>, <span class="number">3</span>), (<span class="string">&#39;d&#39;</span>, <span class="number">2</span>), (<span class="string">&#39;b&#39;</span>, <span class="number">2</span>), (<span class="string">&#39;e&#39;</span>, <span class="number">1</span>), (<span class="string">&#39;a&#39;</span>, <span class="number">1</span>)];
+<span class="macro">assert!</span>(by_common == expected);</code></pre></div>
+<h3 id="test-counters-against-another"><a href="#test-counters-against-another">Test counters against another</a></h3>
+<p>Counters are multi-sets and so can be sub- or supersets of each other.</p>
+<p>A counter is a <em>subset</em> of another if for all its elements, the other
+counter has an equal or higher count. Test for this with <a href="struct.Counter.html#method.is_subset" title="method counter::Counter::is_subset"><code>is_subset()</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counter = <span class="string">&quot;aaabb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>superset = <span class="string">&quot;aaabbbc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>not_a_superset = <span class="string">&quot;aaae&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert!</span>(counter.is_subset(<span class="kw-2">&amp;</span>superset));
+<span class="macro">assert!</span>(!counter.is_subset(<span class="kw-2">&amp;</span>not_a_superset));</code></pre></div>
+<p>Testing for a <em>superset</em> is the inverse, <a href="struct.Counter.html#method.is_superset" title="method counter::Counter::is_superset"><code>is_superset()</code></a> is true if the counter can contain another counter in its entirety:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counter = <span class="string">&quot;aaabbbc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>subset = <span class="string">&quot;aabbb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>not_a_subset = <span class="string">&quot;aaae&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert!</span>(counter.is_superset(<span class="kw-2">&amp;</span>subset));
+<span class="macro">assert!</span>(!counter.is_superset(<span class="kw-2">&amp;</span>not_a_subset));</code></pre></div>
+<p>These relationships continue to work when <a href="#use-your-own-type-for-the-count">using a <em>signed</em> integer type for the counter</a>: all values in the subset must be equal or lower to the values in the superset. Negative
+values are interpreted as ‘missing’ those values, and the subset would need to miss those
+same elements, or be short more, to still be a subset:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>subset = <span class="string">&quot;aaabb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>, i8&gt;&gt;();
+subset.insert(<span class="string">&#39;e&#39;</span>, -<span class="number">2</span>);  <span class="comment">// short 2 &#39;e&#39;s
+</span>subset.insert(<span class="string">&#39;f&#39;</span>, -<span class="number">1</span>);  <span class="comment">// and 1 &#39;f&#39;
+</span><span class="kw">let </span><span class="kw-2">mut </span>superset = <span class="string">&quot;aaaabbb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>, i8&gt;&gt;();
+superset.insert(<span class="string">&#39;e&#39;</span>, -<span class="number">1</span>);  <span class="comment">// short 1 &#39;e&#39;
+</span><span class="macro">assert!</span>(subset.is_subset(<span class="kw-2">&amp;</span>superset));
+<span class="macro">assert!</span>(superset.is_superset(<span class="kw-2">&amp;</span>subset));</code></pre></div>
+<h3 id="counter-intersection-and-union"><a href="#counter-intersection-and-union">Counter intersection and union</a></h3>
+<p>You can intersect two counters, giving you the minimal counts of their
+combined elements using the <a href="https://doc.rust-lang.org/std/ops/trait.BitAnd.html"><code>&amp;</code> bitwise and operator</a>, and produce
+their union with the maximum counts using <a href="https://doc.rust-lang.org/std/ops/trait.BitOr.html"><code>|</code> bitwise or</a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>a = <span class="string">&quot;aaabb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>b = <span class="string">&quot;aabbbbe&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+
+<span class="kw">let </span>intersection = a &amp; b;
+<span class="kw">let </span>expected_intersection = <span class="string">&quot;aabb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(intersection, expected_intersection);
+
+<span class="kw">let </span>c = <span class="string">&quot;aaabb&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="kw">let </span>d = <span class="string">&quot;aabbbbe&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+
+<span class="kw">let </span>union = c | d;
+<span class="kw">let </span>expected_union = <span class="string">&quot;aaabbbbe&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(union, expected_union)</code></pre></div>
+<p>The in-place <a href="https://doc.rust-lang.org/std/ops/trait.BitAndAssign.html"><code>&amp;=</code></a> and <a href="https://doc.rust-lang.org/std/ops/trait.BitOrAssign.html"><code>|=</code></a> operations are also supported.</p>
+<h3 id="treat-it-like-a-hashmap"><a href="#treat-it-like-a-hashmap">Treat it like a <code>HashMap</code></a></h3>
+<p><code>Counter&lt;T, N&gt;</code> implements <a href="https://doc.rust-lang.org/stable/std/ops/trait.Deref.html"><code>Deref</code></a><code>&lt;Target=HashMap&lt;T, N&gt;&gt;</code> and
+<a href="https://doc.rust-lang.org/stable/std/ops/trait.DerefMut.html"><code>DerefMut</code></a><code>&lt;Target=HashMap&lt;T, N&gt;&gt;</code>, which means that you can perform any operations
+on it which are valid for a <a href="https://doc.rust-lang.org/std/collections/struct.HashMap.html"><code>HashMap</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>counter = <span class="string">&quot;aa-bb-cc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+counter.remove(<span class="kw-2">&amp;</span><span class="string">&#39;-&#39;</span>);
+<span class="macro">assert!</span>(counter == <span class="string">&quot;aabbcc&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;());</code></pre></div>
+<p>Note that <code>Counter&lt;T, N&gt;</code> itself implements <a href="https://doc.rust-lang.org/stable/std/ops/trait.Index.html"><code>Index</code></a>. <code>Counter::index</code> returns a reference to
+a <a href="https://docs.rs/num-traits/latest/num_traits/identities/trait.Zero.html#tymethod.zero"><code>Zero::zero</code></a> value for missing keys.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counter = <span class="string">&quot;aaa&quot;</span>.chars().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">assert_eq!</span>(counter[<span class="kw-2">&amp;</span><span class="string">&#39;b&#39;</span>], <span class="number">0</span>);
+<span class="comment">// panics
+// assert_eq!((*counter)[&amp;&#39;b&#39;], 0);</span></code></pre></div>
+<h2 id="advanced-usage"><a href="#advanced-usage">Advanced Usage</a></h2><h3 id="count-any-iterable-which-is-hash--eq"><a href="#count-any-iterable-which-is-hash--eq">Count any iterable which is <code>Hash + Eq</code></a></h3>
+<p>You can’t use the <code>most_common*</code> functions unless <code>T</code> is also <a href="https://doc.rust-lang.org/stable/std/clone/trait.Clone.html"><code>Clone</code></a>, but simple counting
+works fine on a minimal data type.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(Debug, Hash, PartialEq, Eq)]
+</span><span class="kw">struct </span>Inty {
+    i: usize,
+}
+
+<span class="kw">impl </span>Inty {
+    <span class="kw">pub fn </span>new(i: usize) -&gt; Inty {
+        Inty { i: i }
+    }
+}
+
+<span class="comment">// &lt;https://en.wikipedia.org/wiki/867-5309/Jenny&gt;
+</span><span class="kw">let </span>intys = <span class="macro">vec!</span>[
+    Inty::new(<span class="number">8</span>),
+    Inty::new(<span class="number">0</span>),
+    Inty::new(<span class="number">0</span>),
+    Inty::new(<span class="number">8</span>),
+    Inty::new(<span class="number">6</span>),
+    Inty::new(<span class="number">7</span>),
+    Inty::new(<span class="number">5</span>),
+    Inty::new(<span class="number">3</span>),
+    Inty::new(<span class="number">0</span>),
+    Inty::new(<span class="number">9</span>),
+];
+
+<span class="kw">let </span>inty_counts = intys.iter().collect::&lt;Counter&lt;<span class="kw">_</span>&gt;&gt;();
+<span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, inty_counts);
+<span class="comment">// {Inty { i: 8 }: 2, Inty { i: 0 }: 3, Inty { i: 9 }: 1, Inty { i: 3 }: 1,
+//  Inty { i: 7 }: 1, Inty { i: 6 }: 1, Inty { i: 5 }: 1}
+</span><span class="macro">assert!</span>(inty_counts.get(<span class="kw-2">&amp;</span>Inty { i: <span class="number">8 </span>}) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
+<span class="macro">assert!</span>(inty_counts.get(<span class="kw-2">&amp;</span>Inty { i: <span class="number">0 </span>}) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">3</span>));
+<span class="macro">assert!</span>(inty_counts.get(<span class="kw-2">&amp;</span>Inty { i: <span class="number">6 </span>}) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));</code></pre></div>
+<h3 id="use-your-own-type-for-the-count"><a href="#use-your-own-type-for-the-count">Use your own type for the count</a></h3>
+<p>Sometimes <a href="https://doc.rust-lang.org/stable/std/primitive.usize.html"><code>usize</code></a> just isn’t enough. If you find yourself overflowing your
+machine’s native size, you can use your own type. Here, we use an <a href="https://doc.rust-lang.org/stable/std/primitive.i8.html"><code>i8</code></a>, but
+you can use most numeric types, including bignums, as necessary.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>counter: Counter&lt;<span class="kw">_</span>, i8&gt; = <span class="string">&quot;abbccc&quot;</span>.chars().collect();
+<span class="kw">let </span>expected: HashMap&lt;char, i8&gt; = [(<span class="string">&#39;a&#39;</span>, <span class="number">1</span>), (<span class="string">&#39;b&#39;</span>, <span class="number">2</span>), (<span class="string">&#39;c&#39;</span>, <span class="number">3</span>)].iter().cloned().collect();
+<span class="macro">assert!</span>(counter.into_map() == expected);</code></pre></div>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.Counter.html" title="struct counter::Counter">Counter</a></div></li></ul></section></div></main></body></html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Cynic"><title>cynic - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="cynic" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../cynic/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../cynic/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2 class="location"><a href="#">Crate cynic</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 3.2.2</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#attributes">Attribute Macros</a></li><li><a href="#derives">Derive Macros</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">cynic</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/cynic/lib.rs.html#1-268">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="cynic"><a href="#cynic">Cynic</a></h2>
+<p>Cynic is a GraphQL query builder &amp; data mapper for Rust.</p>
+<p>This documentation is primarily intended to be a reference for specific
+functions, for a guide to using <code>Cynic</code> see the website: <a href="https://cynic-rs.dev">cynic-rs.dev</a>.</p>
+<h3 id="overview"><a href="#overview">Overview</a></h3>
+<p>To get started with Cynic you’ll need a GraphQL schema for the API you wish
+to query.  The examples will be using the star wars API.</p>
+<h4 id="generating-a-query-dsl"><a href="#generating-a-query-dsl">Generating a Query DSL</a></h4>
+<p>Once you’ve got your schema installed locally, you’ll need to use the
+<code>use_schema</code> macro to generate a schema module:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">mod </span>schema {
+    <span class="macro">cynic::use_schema!</span>(<span class="string">&quot;../schemas/starwars.schema.graphql&quot;</span>);
+}</code></pre></div>
+<p>This macro generates a few things:</p>
+<ol>
+<li>Some structs to represent the Input types the underlying schema.
+You may need to use these to build mutations or as parameters to queries.</li>
+<li>Definitions of all the Enums in the provided schema.  You’ll need these
+if you want to use any enum types.</li>
+<li>Type safe selection set functions.  These can be used to build up a query
+manually, though it’s usually easier to use the <code>QueryFragment</code> derive
+functionality explained below.  Hopefully you’ll not need to use these
+directly too often.</li>
+</ol>
+<p>Though using macros to generate these is convenient, it does leave a lot of
+code to the imagination.  You can get a glimpse of the things this defines
+by running <code>cargo doc --document-private-items</code> and having a look in the
+<code>schema</code> module. It’s not ideal, but at least provides some visibility into
+the various enum types.</p>
+<h4 id="creating-queryfragments"><a href="#creating-queryfragments">Creating QueryFragments</a></h4>
+<p>Now that you have a schema defined, you can start building some queries.
+Cynic lets you do this by deriving <code>QueryFragment</code> for a struct.  For
+example, if we wanted to know what director title &amp; director a Star Wars
+film had, we could define this <code>QueryFragment</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="attr">#[derive(cynic::QueryFragment)]
+#[cynic(schema_path = <span class="string">&quot;../schemas/starwars.schema.graphql&quot;</span>)]
+</span><span class="kw">struct </span>Film {
+    title: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    director: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="comment">// This `Film` struct can now be used as the type of a field on any other
+// `QueryFragment` struct and cynic will know how to turn that into a GraphQL
+// query, and populate the `Film` struct from the response.
+
+// For example, if we wanted to know the Director for a particular film:
+
+</span><span class="attr">#[derive(cynic::QueryFragment)]
+#[cynic(
+    schema_path = <span class="string">&quot;../schemas/starwars.schema.graphql&quot;</span>,
+    graphql_type = <span class="string">&quot;Root&quot;
+</span>)]
+</span><span class="kw">struct </span>FilmDirectorQuery {
+    <span class="comment">// Here we use the `#[arguments()]` attribute on the `film` field to provide a
+    // hard coded film ID to look up.  Though useful for demonstration, hard coded
+    // arguments like this aren&#39;t much use in reality.  For more details on providing
+    // runtime arguments please see below.
+    </span><span class="attr">#[arguments(id = cynic::Id::new(<span class="string">&quot;ZmlsbXM6MQ==&quot;</span>))]
+    </span>film: <span class="prelude-ty">Option</span>&lt;Film&gt;,
+}
+
+<span class="comment">// You can then build a `cynic::Operation` from this fragment
+</span><span class="kw">use </span>cynic::QueryBuilder;
+<span class="kw">let </span>operation = FilmDirectorQuery::build(());</code></pre></div>
+<p><code>operation</code> above implements <code>serde::Serialize</code> so can be used with any HTTP
+client.  A selection of HTTP client integrations are provided in
+<code>cynic::http</code> - see the docs there for examples of using a
+<code>cynic::Operation</code></p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span>response = reqwest::blocking::Client::new()
+                    .post(<span class="string">&quot;a_url&quot;</span>)
+                    .json(<span class="kw-2">&amp;</span>operation)
+                    .send()<span class="question-mark">?</span>;
+<span class="kw">let </span>result = response.json::&lt;GraphQlResponse&lt;FilmDirectorQuery&gt;&gt;()<span class="question-mark">?</span>;</code></pre></div>
+<p>After this code has run, result will be an instance of
+<code>GraphQlResponse&lt;FilmDirectorQuery&gt;</code> with the film populated appropriately.</p>
+<h4 id="dynamic-query-arguments"><a href="#dynamic-query-arguments">Dynamic Query Arguments</a></h4>
+<p>The query above was useful for demonstration, but you’ll usually want to be
+able to provide parameters to your query.  To do this, you should define a
+struct that contains all of the parameters you want to provide:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="comment">// Deriving `QueryVariables` allows this struct to be used as variables in a
+// `QueryFragment`, whether it represents part of a query or a whole query.
+</span><span class="attr">#[derive(cynic::QueryVariables)]
+</span><span class="kw">struct </span>FilmArguments {
+    id: <span class="prelude-ty">Option</span>&lt;cynic::Id&gt;,
+}
+
+<span class="comment">// You can now define a query to use these arguments on.  For example, to make
+// `FilmDirectorQuery` a bit more dynamic:
+</span><span class="attr">#[derive(cynic::QueryFragment)]
+#[cynic(
+    schema_path = <span class="string">&quot;../schemas/starwars.schema.graphql&quot;</span>,
+    graphql_type = <span class="string">&quot;Root&quot;</span>,
+    <span class="comment">// By adding the `variables` parameter to our `QueryFragment` we&#39;ve made a variable
+    // named `args` available for use in the `arguments` attribute.
+    </span>variables = <span class="string">&quot;FilmArguments&quot;
+</span>)]
+</span><span class="kw">struct </span>FilmDirectorQueryWithArgs {
+    <span class="comment">// Here we use `args`, which we&#39;ve declared above to be an instance of `FilmArguments`
+    </span><span class="attr">#[arguments(id: <span class="macro-nonterminal">$id</span>)]
+    </span>film: <span class="prelude-ty">Option</span>&lt;Film&gt;,
+}
+
+<span class="comment">// Then we can build a query using this new struct;
+</span><span class="kw">use </span>cynic::QueryBuilder;
+<span class="kw">let </span>operation = FilmDirectorQueryWithArgs::build(FilmArguments {
+    id: <span class="prelude-val">Some</span>(<span class="string">&quot;ZmlsbXM6MQ==&quot;</span>.into()),
+});</code></pre></div>
+<h3 id="feature-flags"><a href="#feature-flags">Feature Flags</a></h3>
+<p>Cynic has a few features that are controlled by feature flags.</p>
+<ul>
+<li><code>http-surf</code> adds integration with the <a href="https://github.com/http-rs/surf"><code>surf</code></a>
+http client.</li>
+<li><code>http-reqwest</code> adds async integration with the <a href="https://github.com/seanmonstar/reqwest"><code>reqwest</code></a>
+http client.</li>
+<li><code>http-reqwest-blocking</code> adds blocking integration with the <a href="https://github.com/seanmonstar/reqwest"><code>reqwest</code></a>
+http client.</li>
+<li><code>rkyv</code> can be used to speed up compiles when working with large schemas.</li>
+</ul>
+<p>It’s worth noting that each of these features pulls in extra
+dependencies, which may impact your build size.  Particularly
+if you’re targeting WASM.  In particular the <code>url</code> crate has
+<a href="https://github.com/servo/rust-url/issues/557">known issues</a> when
+targeting web assembly.</p>
+</div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2><ul class="item-table"><li><div class="item-name" id="reexport.QueryVariables"><code>pub use variables::<a class="trait" href="variables/trait.QueryVariables.html" title="trait cynic::variables::QueryVariables">QueryVariables</a>;</code></div></li><li><div class="item-name" id="reexport.QueryVariablesFields"><code>pub use variables::<a class="trait" href="variables/trait.QueryVariablesFields.html" title="trait cynic::variables::QueryVariablesFields">QueryVariablesFields</a>;</code></div></li><li><div class="item-name" id="reexport.serde"><code>pub use <a class="mod" href="../serde/index.html" title="mod serde">serde</a>;</code></div></li></ul><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><ul class="item-table"><li><div class="item-name"><a class="mod" href="coercions/index.html" title="mod cynic::coercions">coercions</a></div><div class="desc docblock-short">GraphQL has a number of coercion rules that make it easier to use and allow
+certain changes to be made in a backwards compatible way.</div></li><li><div class="item-name"><a class="mod" href="http/index.html" title="mod cynic::http">http</a></div><div class="desc docblock-short">HTTP client support for cynic.</div></li><li><div class="item-name"><a class="mod" href="queries/index.html" title="mod cynic::queries">queries</a></div><div class="desc docblock-short">Tools for building GraphQL queries in cynic</div></li><li><div class="item-name"><a class="mod" href="schema/index.html" title="mod cynic::schema">schema</a></div><div class="desc docblock-short">Types for describing a GraphQL schema in Rust.</div></li><li><div class="item-name"><a class="mod" href="variables/index.html" title="mod cynic::variables">variables</a></div><div class="desc docblock-short">Types &amp; traits for working with GraphQL Variables</div></li></ul><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2><ul class="item-table"><li><div class="item-name"><a class="macro" href="macro.assert_impl.html" title="macro cynic::assert_impl">assert_impl</a></div><div class="desc docblock-short">Asserts that the type implements <em>all</em> of the given traits.</div></li><li><div class="item-name"><a class="macro" href="macro.assert_type_eq_all.html" title="macro cynic::assert_type_eq_all">assert_type_eq_all</a></div><div class="desc docblock-short">Asserts that <em>all</em> types in a list are equal to each other.</div></li><li><div class="item-name"><a class="macro" href="macro.impl_coercions.html" title="macro cynic::impl_coercions">impl_coercions</a></div><div class="desc docblock-short">Implements the default GraphQL list &amp; option coercion rules for a type.</div></li><li><div class="item-name"><a class="macro" href="macro.impl_scalar.html" title="macro cynic::impl_scalar">impl_scalar</a></div><div class="desc docblock-short">Implements a set of scalar traits for the given type &amp; type lock.</div></li><li><div class="item-name"><a class="macro" href="macro.use_schema.html" title="macro cynic::use_schema">use_schema</a></div><div class="desc docblock-short">Imports a schema for use by cynic.</div></li></ul><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.GraphQlError.html" title="struct cynic::GraphQlError">GraphQlError</a></div><div class="desc docblock-short">A model describing an error which has taken place during execution.</div></li><li><div class="item-name"><a class="struct" href="struct.GraphQlErrorLocation.html" title="struct cynic::GraphQlErrorLocation">GraphQlErrorLocation</a></div><div class="desc docblock-short">A line and column offset describing the location of an error within a GraphQL document.</div></li><li><div class="item-name"><a class="struct" href="struct.GraphQlResponse.html" title="struct cynic::GraphQlResponse">GraphQlResponse</a></div><div class="desc docblock-short">The response to a GraphQl operation</div></li><li><div class="item-name"><a class="struct" href="struct.Id.html" title="struct cynic::Id">Id</a></div><div class="desc docblock-short">A GraphQL <code>ID</code></div></li><li><div class="item-name"><a class="struct" href="struct.Operation.html" title="struct cynic::Operation">Operation</a></div><div class="desc docblock-short">An Operation that can be sent to a remote GraphQL server.</div></li><li><div class="item-name"><a class="struct" href="struct.OperationBuilder.html" title="struct cynic::OperationBuilder">OperationBuilder</a></div><div class="desc docblock-short">Low level builder for <a href="struct.Operation.html" title="struct cynic::Operation">Operation</a>.</div></li><li><div class="item-name"><a class="struct" href="struct.StreamingOperation.html" title="struct cynic::StreamingOperation">StreamingOperation</a></div><div class="desc docblock-short">A StreamingOperation is an Operation that expects a stream of results.</div></li></ul><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2><ul class="item-table"><li><div class="item-name"><a class="enum" href="enum.GraphQlErrorPathSegment.html" title="enum cynic::GraphQlErrorPathSegment">GraphQlErrorPathSegment</a></div><div class="desc docblock-short">A segment of a GraphQL error path.</div></li><li><div class="item-name"><a class="enum" href="enum.OperationBuildError.html" title="enum cynic::OperationBuildError">OperationBuildError</a></div><div class="desc docblock-short">Errors that can occur when building the operation</div></li></ul><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><ul class="item-table"><li><div class="item-name"><a class="trait" href="trait.Enum.html" title="trait cynic::Enum">Enum</a></div><div class="desc docblock-short">A GraphQL Enum.</div></li><li><div class="item-name"><a class="trait" href="trait.InlineFragments.html" title="trait cynic::InlineFragments">InlineFragments</a></div><div class="desc docblock-short">A QueryFragment that contains a set of inline fragments</div></li><li><div class="item-name"><a class="trait" href="trait.InputObject.html" title="trait cynic::InputObject">InputObject</a></div><div class="desc docblock-short">A GraphQL input object.</div></li><li><div class="item-name"><a class="trait" href="trait.MutationBuilder.html" title="trait cynic::MutationBuilder">MutationBuilder</a></div><div class="desc docblock-short">Provides a <code>build</code> function on <code>QueryFragment</code>s that represent a mutation</div></li><li><div class="item-name"><a class="trait" href="trait.QueryBuilder.html" title="trait cynic::QueryBuilder">QueryBuilder</a></div><div class="desc docblock-short">Provides a <code>build</code> function on <code>QueryFragment</code>s that represent a query</div></li><li><div class="item-name"><a class="trait" href="trait.QueryFragment.html" title="trait cynic::QueryFragment">QueryFragment</a></div><div class="desc docblock-short">A trait that marks a type as part of a GraphQL query.</div></li><li><div class="item-name"><a class="trait" href="trait.SubscriptionBuilder.html" title="trait cynic::SubscriptionBuilder">SubscriptionBuilder</a></div><div class="desc docblock-short">Provides a <code>build</code> function on <code>QueryFragment</code>s that represent a subscription</div></li></ul><h2 id="attributes" class="small-section-header"><a href="#attributes">Attribute Macros</a></h2><ul class="item-table"><li><div class="item-name"><a class="attr" href="attr.schema.html" title="attr cynic::schema">schema</a></div><div class="desc docblock-short">Imports a registered schema into a schema module.</div></li><li><div class="item-name"><a class="attr" href="attr.schema_for_derives.html" title="attr cynic::schema_for_derives">schema_for_derives</a></div><div class="desc docblock-short">An attribute macro to automatically add schema attributes to cynic derives.</div></li></ul><h2 id="derives" class="small-section-header"><a href="#derives">Derive Macros</a></h2><ul class="item-table"><li><div class="item-name"><a class="derive" href="derive.Enum.html" title="derive cynic::Enum">Enum</a></div><div class="desc docblock-short">Derives <code>cynic::Enum</code></div></li><li><div class="item-name"><a class="derive" href="derive.InlineFragments.html" title="derive cynic::InlineFragments">InlineFragments</a></div><div class="desc docblock-short">Derives <code>cynic::InlineFragments</code></div></li><li><div class="item-name"><a class="derive" href="derive.InputObject.html" title="derive cynic::InputObject">InputObject</a></div><div class="desc docblock-short">Derives <code>InputObject</code></div></li><li><div class="item-name"><a class="derive" href="derive.QueryFragment.html" title="derive cynic::QueryFragment">QueryFragment</a></div><div class="desc docblock-short">Derives <code>cynic::QueryFragment</code></div></li><li><div class="item-name"><a class="derive" href="derive.QueryVariables.html" title="derive cynic::QueryVariables">QueryVariables</a></div><div class="desc docblock-short">Derives <code>cynic::QueryVariables</code></div></li><li><div class="item-name"><a class="derive" href="derive.Scalar.html" title="derive cynic::Scalar">Scalar</a></div><div class="desc docblock-short">Derives <code>cynic::Scalar</code></div></li></ul></section></div></main></body></html>

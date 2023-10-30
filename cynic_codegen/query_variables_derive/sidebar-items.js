@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["query_variables_derive","query_variables_derive_impl"]};

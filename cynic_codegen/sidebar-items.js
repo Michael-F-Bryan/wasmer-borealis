@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["RenameAll"],"fn":["output_schema_module"],"mod":["enum_derive","fragment_derive","generics_for_serde","inline_fragments_derive","input_object_derive","query_variables_derive","registration","scalar_derive","schema_for_derives","schema_module_attr","use_schema"]};

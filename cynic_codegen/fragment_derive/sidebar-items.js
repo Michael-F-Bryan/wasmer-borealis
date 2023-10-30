@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["fragment_derive","fragment_derive_impl"],"struct":["FragmentDeriveField","FragmentDeriveInput"]};

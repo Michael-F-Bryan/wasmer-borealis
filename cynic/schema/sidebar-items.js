@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":["Field","HasArgument","HasField","HasInputField","HasSubtype","InputObjectMarker","IsScalar","MutationRoot","NamedType","QueryRoot","SubscriptionRoot"]};

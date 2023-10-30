@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["InputLiteral"],"fn":["to_input_literal"],"struct":["Argument","SelectionBuilder","SelectionSet"],"trait":["FlattensInto","IsFieldType","Recursable","VariableMatch"]};

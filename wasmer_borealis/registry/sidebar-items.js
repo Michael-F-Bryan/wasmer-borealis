@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["all_packages","all_packages_by_user","all_packages_in_namespace","packages_query"],"mod":["queries"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["add_schema_attrs_to_derives"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["input_object_derive","input_object_derive_impl"],"struct":["InputObjectDeriveInput"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SchemaRegistrationError"],"fn":["register_schema"],"struct":["SchemaRegistration","SchemaRegistrationBuilder"]};

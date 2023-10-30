@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"static":["SCHEMA_PATH"],"struct":["Schema"]};

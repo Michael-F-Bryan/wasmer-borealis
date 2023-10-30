@@ -1,0 +1,4 @@
+(function() {var implementors = {
+"cynic":[],
+"wasmer_borealis":[["impl <a class=\"trait\" href=\"cynic/queries/builders/trait.VariableMatch.html\" title=\"trait cynic::queries::builders::VariableMatch\">VariableMatch</a>&lt;<a class=\"struct\" href=\"wasmer_borealis/registry/queries/struct.VariablesFields.html\" title=\"struct wasmer_borealis::registry::queries::VariablesFields\">VariablesFields</a>&gt; for <a class=\"struct\" href=\"wasmer_borealis/registry/queries/struct.VariablesFields.html\" title=\"struct wasmer_borealis::registry::queries::VariablesFields\">VariablesFields</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

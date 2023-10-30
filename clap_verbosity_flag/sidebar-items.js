@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Level","LevelFilter"],"struct":["ErrorLevel","InfoLevel","Verbosity","WarnLevel"],"trait":["LogLevel"]};

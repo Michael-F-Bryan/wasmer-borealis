@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["GetAllPackages","GetNamespace","GetUserPackages","Namespace","Package","PackageConnection","PackageDistribution","PackageEdge","PackageVersion","User","Variables","VariablesFields"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["schema","schema_for_derives"],"derive":["Enum","InlineFragments","InputObject","QueryFragment","QueryVariables","Scalar"],"macro":["use_schema"]};
