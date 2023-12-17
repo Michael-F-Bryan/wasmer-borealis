@@ -32,8 +32,6 @@
       "required": [
         "package",
         "args",
-        "command",
-        "env",
         "Filters"
       ]
     },
@@ -62,13 +60,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "blacklist",
-        "include-every-version",
-        "namespaces",
-        "users"
-      ]
+      "type": "object"
     }
   }
 }

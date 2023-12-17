@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 
+	wasmer_borealis "github.com/Michael-F-Bryan/wasmer-borealis"
 	"go.uber.org/zap"
 )
 
@@ -17,9 +18,10 @@ func main() {
 }
 
 type args struct {
-	port    int
-	host    string
-	devMode bool
+	port     int
+	host     string
+	devMode  bool
+	registry string
 }
 
 func parseArgs() args {
@@ -28,6 +30,7 @@ func parseArgs() args {
 	flag.BoolVar(&args.devMode, "dev", false, "Enable developer mode")
 	flag.IntVar(&args.port, "port", 8080, "The port to serve on")
 	flag.StringVar(&args.host, "host", "localhost", "The interface to serve on")
+	flag.StringVar(&args.registry, "registry", wasmer_borealis.ProductionEndpoint, "The GraphQL endpoint to use when discovering packages")
 
 	flag.Parse()
 

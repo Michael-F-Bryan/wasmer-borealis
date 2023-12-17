@@ -11,9 +11,9 @@ type Experiment struct {
 	//
 	// Primarily used when the package doesn't specify an entrypoint and there
 	// are multiple commands available.
-	Command string `json:"command"`
+	Command string `json:"command,omitempty"`
 	// Environment variables that should be set for the package.
-	Env     map[string]string `json:"env"`
+	Env     map[string]string `json:"env,omitempty"`
 	Filters Filters
 }
 
@@ -21,24 +21,24 @@ type Experiment struct {
 // against.
 type Filters struct {
 	// Packages that should be ignored.
-	Blacklist []string `json:"blacklist"`
+	Blacklist []string `json:"blacklist,omitempty"`
 	// Should every version of the package be published, or just the most recent
 	// one?
-	IncludeEveryVersion bool `json:"include-every-version"`
+	IncludeEveryVersion bool `json:"include-every-version,omitempty"`
 	// If provided, the experiment will be limited to running packages under
 	// just these namespaces.
-	Namespaces []string `json:"namespaces"`
+	Namespaces []string `json:"namespaces,omitempty"`
 	// If provided, the experiment will be limited to running packages under
 	// just these users.
-	Users []string `json:"users"`
+	Users []string `json:"users,omitempty"`
 }
 
 // Wasmer is used to configure the `wasmer` CLI.
 type Wasmer struct {
 	// Additional arguments to pass to the `wasmer` CLI.
-	Args []string `json:"args"`
+	Args []string `json:"args,omitempty"`
 	// Environment variables passed to the `wasmer` CLI.
-	Env map[string]string `json:"env"`
+	Env map[string]string `json:"env,omitempty"`
 	// Which `wasmer` CLI should we use?
 	//
 	// If this is a valid Semver version number, that version will be downloaded
@@ -46,5 +46,5 @@ type Wasmer struct {
 	// executable to use.
 	//
 	// Defaults to the latest released version if not provided.
-	Version string `json:"version"`
+	Version string `json:"version,omitempty"`
 }
