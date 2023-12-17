@@ -6,9 +6,6 @@ on:
     branches:
     - main
 
-env:
-  DEFAULT_CRATE_NAME: wasmer_borealis
-
 permissions:
   contents: write
   pull-requests: write
@@ -29,56 +26,41 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Rust
-        uses: dsherret/rust-toolchain-file@v1
-      - name: Install Nextest
-        uses: taiki-e/install-action@nextest
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-      - name: Type Checking
-        run: cargo check --workspace --verbose --locked
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '^1.21.5'
+      - name: Print the go version
+        run: go version
+      - name: Fetch Dependencies
+        run: go get -v .
       - name: Build
-        run: cargo build --workspace --verbose --locked
+        run: go build -v ./...
       - name: Test
-        run: cargo nextest run --workspace --verbose --locked
-      - name: Doc Tests
-        run: cargo test --doc --workspace --verbose --locked
+        run: go test -v -race -cover -coverprofile=coverage.out ./...
+      - name: Generate Coverage Report
+        run: |
+          go tool cover -func=coverage.out
+          go tool cover -html=coverage.out -o=coverage.html
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{runner.os}}
+          path: ./coverage.html
 
   lints:
     name: Linting and Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-      - name: Setup Rust
-        uses: dsherret/rust-toolchain-file@v1
-      - name: Check Formatting
-        run: cargo fmt --all --verbose --check
-      - name: Clippy
-        run: cargo clippy --workspace --verbose
-
-  api-docs:
-    name: Publish API Docs to GitHub Pages
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-      - name: Setup Rust
-        uses: dsherret/rust-toolchain-file@v1
-      - name: Generate API docs
-        run: cargo doc --workspace --verbose --locked
-      - name: Redirect top-level GitHub Pages
-        run: 'echo ''<meta http-equiv="refresh" content="0; url=${{ env.DEFAULT_CRATE_NAME }}/index.html" />'' > target/doc/index.html'
-        shell: bash
-      - name: Upload API Docs
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
-        if: github.ref == 'refs/heads/main'
+      - uses: actions/setup-go@v4
         with:
-          branch: gh-pages
-          folder: target/doc
-          single-commit: true
+          go-version: '^1.21.5'
+      - name: Print the go version
+        run: go version
+      - name: Linting
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
 
   workflow-times:
     name: Workflow Timings
