@@ -24,6 +24,9 @@ jobs:
           - windows-latest
           - macos-latest
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v4
@@ -41,6 +44,7 @@ jobs:
         run: go tool cover -func=coverage.out
       - name: Generate Coverage Report
         run: go tool cover -html=coverage.out -o=coverage.html
+        shell: bash
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
