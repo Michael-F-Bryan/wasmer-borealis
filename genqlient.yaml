@@ -3,5 +3,5 @@
 package: wasmer_borealis
 schema: wasmer-registry.graphql
 operations:
-  - graphql/whoami.graphql
+  - graphql/*.graphql
 generated: graphql_generated.go

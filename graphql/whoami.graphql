@@ -1,5 +1,0 @@
-query whoami() {
-    viewer {
-        username
-    }
-}

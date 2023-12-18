@@ -1,0 +1,12 @@
+query getLatestVersion($name: String!) {
+    getPackage(name: $name) {
+        lastVersion {
+            id
+            version
+            distribution {
+                downloadUrl
+                piritaDownloadUrl
+            }
+        }
+    }
+}

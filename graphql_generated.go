@@ -8,43 +8,192 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
-// whoamiResponse is returned by whoami on success.
-type whoamiResponse struct {
-	Viewer whoamiViewerUser `json:"viewer"`
+// __getLatestVersionInput is used internally by genqlient
+type __getLatestVersionInput struct {
+	Name string `json:"name"`
 }
 
-// GetViewer returns whoamiResponse.Viewer, and is useful for accessing the field via an interface.
-func (v *whoamiResponse) GetViewer() whoamiViewerUser { return v.Viewer }
+// GetName returns __getLatestVersionInput.Name, and is useful for accessing the field via an interface.
+func (v *__getLatestVersionInput) GetName() string { return v.Name }
 
-// whoamiViewerUser includes the requested fields of the GraphQL type User.
-type whoamiViewerUser struct {
-	// Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-	Username string `json:"username"`
+// __getVersionInput is used internally by genqlient
+type __getVersionInput struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
-// GetUsername returns whoamiViewerUser.Username, and is useful for accessing the field via an interface.
-func (v *whoamiViewerUser) GetUsername() string { return v.Username }
+// GetName returns __getVersionInput.Name, and is useful for accessing the field via an interface.
+func (v *__getVersionInput) GetName() string { return v.Name }
 
-// The query or mutation executed by whoami.
-const whoami_Operation = `
-query whoami {
-	viewer {
-		username
+// GetVersion returns __getVersionInput.Version, and is useful for accessing the field via an interface.
+func (v *__getVersionInput) GetVersion() string { return v.Version }
+
+// getLatestVersionGetPackage includes the requested fields of the GraphQL type Package.
+type getLatestVersionGetPackage struct {
+	LastVersion getLatestVersionGetPackageLastVersionPackageVersion `json:"lastVersion"`
+}
+
+// GetLastVersion returns getLatestVersionGetPackage.LastVersion, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackage) GetLastVersion() getLatestVersionGetPackageLastVersionPackageVersion {
+	return v.LastVersion
+}
+
+// getLatestVersionGetPackageLastVersionPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getLatestVersionGetPackageLastVersionPackageVersion struct {
+	// The ID of the object
+	Id           string                                                                             `json:"id"`
+	Version      string                                                                             `json:"version"`
+	Distribution getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getLatestVersionGetPackageLastVersionPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackageLastVersionPackageVersion) GetId() string { return v.Id }
+
+// GetVersion returns getLatestVersionGetPackageLastVersionPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackageLastVersionPackageVersion) GetVersion() string { return v.Version }
+
+// GetDistribution returns getLatestVersionGetPackageLastVersionPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackageLastVersionPackageVersion) GetDistribution() getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution struct {
+	DownloadUrl       string `json:"downloadUrl"`
+	PiritaDownloadUrl string `json:"piritaDownloadUrl"`
+}
+
+// GetDownloadUrl returns getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetPiritaDownloadUrl returns getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution.PiritaDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution) GetPiritaDownloadUrl() string {
+	return v.PiritaDownloadUrl
+}
+
+// getLatestVersionResponse is returned by getLatestVersion on success.
+type getLatestVersionResponse struct {
+	GetPackage getLatestVersionGetPackage `json:"getPackage"`
+}
+
+// GetGetPackage returns getLatestVersionResponse.GetPackage, and is useful for accessing the field via an interface.
+func (v *getLatestVersionResponse) GetGetPackage() getLatestVersionGetPackage { return v.GetPackage }
+
+// getVersionGetPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getVersionGetPackageVersion struct {
+	// The ID of the object
+	Id           string                                                     `json:"id"`
+	Distribution getVersionGetPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getVersionGetPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getVersionGetPackageVersion) GetId() string { return v.Id }
+
+// GetDistribution returns getVersionGetPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getVersionGetPackageVersion) GetDistribution() getVersionGetPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getVersionGetPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getVersionGetPackageVersionDistributionPackageDistribution struct {
+	DownloadUrl       string `json:"downloadUrl"`
+	PiritaDownloadUrl string `json:"piritaDownloadUrl"`
+}
+
+// GetDownloadUrl returns getVersionGetPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getVersionGetPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetPiritaDownloadUrl returns getVersionGetPackageVersionDistributionPackageDistribution.PiritaDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getVersionGetPackageVersionDistributionPackageDistribution) GetPiritaDownloadUrl() string {
+	return v.PiritaDownloadUrl
+}
+
+// getVersionResponse is returned by getVersion on success.
+type getVersionResponse struct {
+	GetPackageVersion getVersionGetPackageVersion `json:"getPackageVersion"`
+}
+
+// GetGetPackageVersion returns getVersionResponse.GetPackageVersion, and is useful for accessing the field via an interface.
+func (v *getVersionResponse) GetGetPackageVersion() getVersionGetPackageVersion {
+	return v.GetPackageVersion
+}
+
+// The query or mutation executed by getLatestVersion.
+const getLatestVersion_Operation = `
+query getLatestVersion ($name: String!) {
+	getPackage(name: $name) {
+		lastVersion {
+			id
+			version
+			distribution {
+				downloadUrl
+				piritaDownloadUrl
+			}
+		}
 	}
 }
 `
 
-func whoami(
+func getLatestVersion(
 	ctx context.Context,
 	client graphql.Client,
-) (*whoamiResponse, error) {
+	name string,
+) (*getLatestVersionResponse, error) {
 	req := &graphql.Request{
-		OpName: "whoami",
-		Query:  whoami_Operation,
+		OpName: "getLatestVersion",
+		Query:  getLatestVersion_Operation,
+		Variables: &__getLatestVersionInput{
+			Name: name,
+		},
 	}
 	var err error
 
-	var data whoamiResponse
+	var data getLatestVersionResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by getVersion.
+const getVersion_Operation = `
+query getVersion ($name: String!, $version: String!) {
+	getPackageVersion(name: $name, version: $version) {
+		id
+		distribution {
+			downloadUrl
+			piritaDownloadUrl
+		}
+	}
+}
+`
+
+func getVersion(
+	ctx context.Context,
+	client graphql.Client,
+	name string,
+	version string,
+) (*getVersionResponse, error) {
+	req := &graphql.Request{
+		OpName: "getVersion",
+		Query:  getVersion_Operation,
+		Variables: &__getVersionInput{
+			Name:    name,
+			Version: version,
+		},
+	}
+	var err error
+
+	var data getVersionResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
