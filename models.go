@@ -11,7 +11,7 @@ import (
 type RunningExperiment struct {
 	gorm.Model
 	// The JSON definition for this experiment.
-	Definition string
+	Definition string `json:"definition"`
 }
 
 func (e RunningExperiment) Experiment() (Experiment, error) {

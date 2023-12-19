@@ -19,6 +19,13 @@ import (
 
 const defaultUserAgent = "wasmer-borealis"
 
+// ProductionEndpoint is the GraphQL endpoint used by Wasmer's production
+// registry.
+const ProductionEndpoint = "https://registry.wasmer.io/graphql"
+
+// DevelopmentEndpoint is the GraphQL endpoint for Wasmer's staging environment.
+const DevelopmentEndpoint = "https://registry.wasmer.wtf/graphql"
+
 var errResolvePanicked = errors.New("resolve panicked")
 var errUnknownPackage = errors.New("no such package")
 
