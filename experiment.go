@@ -1,8 +1,8 @@
 package wasmer_borealis
 
-// Experiment instructs Wasmer Borealis how to run an experiment against the
+// Config instructs Wasmer Borealis how to run an experiment against the
 // Wasmer registry.
-type Experiment struct {
+type Config struct {
 	// A package which will run on every Wasmer package in the experiment.
 	Package string `json:"package"`
 	// Arguments passed through to the package.

@@ -4,9 +4,67 @@ package wasmer_borealis
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/Khan/genqlient/graphql"
 )
+
+// __getAllByNamespaceInput is used internally by genqlient
+type __getAllByNamespaceInput struct {
+	Name  string `json:"name"`
+	After string `json:"after"`
+}
+
+// GetName returns __getAllByNamespaceInput.Name, and is useful for accessing the field via an interface.
+func (v *__getAllByNamespaceInput) GetName() string { return v.Name }
+
+// GetAfter returns __getAllByNamespaceInput.After, and is useful for accessing the field via an interface.
+func (v *__getAllByNamespaceInput) GetAfter() string { return v.After }
+
+// __getAllByUserInput is used internally by genqlient
+type __getAllByUserInput struct {
+	Name  string `json:"name"`
+	After string `json:"after"`
+}
+
+// GetName returns __getAllByUserInput.Name, and is useful for accessing the field via an interface.
+func (v *__getAllByUserInput) GetName() string { return v.Name }
+
+// GetAfter returns __getAllByUserInput.After, and is useful for accessing the field via an interface.
+func (v *__getAllByUserInput) GetAfter() string { return v.After }
+
+// __getAllPackagesInput is used internally by genqlient
+type __getAllPackagesInput struct {
+	After string `json:"after"`
+}
+
+// GetAfter returns __getAllPackagesInput.After, and is useful for accessing the field via an interface.
+func (v *__getAllPackagesInput) GetAfter() string { return v.After }
+
+// __getLatestByNamespaceInput is used internally by genqlient
+type __getLatestByNamespaceInput struct {
+	Name  string `json:"name"`
+	After string `json:"after"`
+}
+
+// GetName returns __getLatestByNamespaceInput.Name, and is useful for accessing the field via an interface.
+func (v *__getLatestByNamespaceInput) GetName() string { return v.Name }
+
+// GetAfter returns __getLatestByNamespaceInput.After, and is useful for accessing the field via an interface.
+func (v *__getLatestByNamespaceInput) GetAfter() string { return v.After }
+
+// __getLatestByUserInput is used internally by genqlient
+type __getLatestByUserInput struct {
+	Name  string `json:"name"`
+	After string `json:"after"`
+}
+
+// GetName returns __getLatestByUserInput.Name, and is useful for accessing the field via an interface.
+func (v *__getLatestByUserInput) GetName() string { return v.Name }
+
+// GetAfter returns __getLatestByUserInput.After, and is useful for accessing the field via an interface.
+func (v *__getLatestByUserInput) GetAfter() string { return v.After }
 
 // __getLatestVersionInput is used internally by genqlient
 type __getLatestVersionInput struct {
@@ -27,6 +85,931 @@ func (v *__getVersionInput) GetName() string { return v.Name }
 
 // GetVersion returns __getVersionInput.Version, and is useful for accessing the field via an interface.
 func (v *__getVersionInput) GetVersion() string { return v.Version }
+
+// getAllByNamespaceGetNamespace includes the requested fields of the GraphQL type Namespace.
+type getAllByNamespaceGetNamespace struct {
+	// The ID of the object
+	Id       string                                                 `json:"id"`
+	Packages getAllByNamespaceGetNamespacePackagesPackageConnection `json:"packages"`
+}
+
+// GetId returns getAllByNamespaceGetNamespace.Id, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespace) GetId() string { return v.Id }
+
+// GetPackages returns getAllByNamespaceGetNamespace.Packages, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespace) GetPackages() getAllByNamespaceGetNamespacePackagesPackageConnection {
+	return v.Packages
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+type getAllByNamespaceGetNamespacePackagesPackageConnection struct {
+	// Pagination data for this connection.
+	PageInfo getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo `json:"pageInfo"`
+	// Contains the nodes in this connection.
+	Edges []getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge `json:"edges"`
+}
+
+// GetPageInfo returns getAllByNamespaceGetNamespacePackagesPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnection) GetPageInfo() getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns getAllByNamespaceGetNamespacePackagesPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnection) GetEdges() []getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// A Relay edge containing a `Package` and its cursor.
+type getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge struct {
+	// The item at the end of the edge
+	Node getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetNode returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge) GetNode() getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+type getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage struct {
+	// The ID of the object
+	Id string `json:"id"`
+	// The name of the package without the owner
+	PackageName string                                                                                                    `json:"packageName"`
+	Versions    []getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion `json:"versions"`
+}
+
+// GetId returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.Id
+}
+
+// GetPackageName returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.PackageName, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetPackageName() string {
+	return v.PackageName
+}
+
+// GetVersions returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.Versions, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetVersions() []getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion {
+	return v.Versions
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion struct {
+	// The ID of the object
+	Id           string                                                                                                                                 `json:"id"`
+	Version      string                                                                                                                                 `json:"version"`
+	Distribution getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetId() string {
+	return v.Id
+}
+
+// GetVersion returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetDistribution returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetDistribution() getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
+	DownloadUrl     string `json:"downloadUrl"`
+	WebcDownloadUrl string `json:"webcDownloadUrl"`
+	WebcSha256Hash  string `json:"webcSha256Hash"`
+}
+
+// GetDownloadUrl returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetWebcDownloadUrl returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.WebcDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetWebcDownloadUrl() string {
+	return v.WebcDownloadUrl
+}
+
+// GetWebcSha256Hash returns getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.WebcSha256Hash, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetWebcSha256Hash() string {
+	return v.WebcSha256Hash
+}
+
+// getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+}
+
+// GetEndCursor returns getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceGetNamespacePackagesPackageConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// getAllByNamespaceResponse is returned by getAllByNamespace on success.
+type getAllByNamespaceResponse struct {
+	GetNamespace getAllByNamespaceGetNamespace `json:"getNamespace"`
+}
+
+// GetGetNamespace returns getAllByNamespaceResponse.GetNamespace, and is useful for accessing the field via an interface.
+func (v *getAllByNamespaceResponse) GetGetNamespace() getAllByNamespaceGetNamespace {
+	return v.GetNamespace
+}
+
+// getAllByUserGetUser includes the requested fields of the GraphQL type User.
+type getAllByUserGetUser struct {
+	// The ID of the object
+	Id       string                                       `json:"id"`
+	Packages getAllByUserGetUserPackagesPackageConnection `json:"packages"`
+}
+
+// GetId returns getAllByUserGetUser.Id, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUser) GetId() string { return v.Id }
+
+// GetPackages returns getAllByUserGetUser.Packages, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUser) GetPackages() getAllByUserGetUserPackagesPackageConnection {
+	return v.Packages
+}
+
+// getAllByUserGetUserPackagesPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+type getAllByUserGetUserPackagesPackageConnection struct {
+	// Pagination data for this connection.
+	PageInfo getAllByUserGetUserPackagesPackageConnectionPageInfo `json:"pageInfo"`
+	// Contains the nodes in this connection.
+	Edges []getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge `json:"edges"`
+}
+
+// GetPageInfo returns getAllByUserGetUserPackagesPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnection) GetPageInfo() getAllByUserGetUserPackagesPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns getAllByUserGetUserPackagesPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnection) GetEdges() []getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// A Relay edge containing a `Package` and its cursor.
+type getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge struct {
+	// The item at the end of the edge
+	Node getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetNode returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdge) GetNode() getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+type getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage struct {
+	// The ID of the object
+	Id string `json:"id"`
+	// The name of the package without the owner
+	PackageName string                                                                                          `json:"packageName"`
+	Versions    []getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion `json:"versions"`
+}
+
+// GetId returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.Id
+}
+
+// GetPackageName returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.PackageName, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetPackageName() string {
+	return v.PackageName
+}
+
+// GetVersions returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.Versions, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetVersions() []getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion {
+	return v.Versions
+}
+
+// getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion struct {
+	// The ID of the object
+	Id           string                                                                                                                       `json:"id"`
+	Version      string                                                                                                                       `json:"version"`
+	Distribution getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetId() string {
+	return v.Id
+}
+
+// GetVersion returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetDistribution returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersion) GetDistribution() getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
+	DownloadUrl     string `json:"downloadUrl"`
+	WebcDownloadUrl string `json:"webcDownloadUrl"`
+	WebcSha256Hash  string `json:"webcSha256Hash"`
+}
+
+// GetDownloadUrl returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetWebcDownloadUrl returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.WebcDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetWebcDownloadUrl() string {
+	return v.WebcDownloadUrl
+}
+
+// GetWebcSha256Hash returns getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution.WebcSha256Hash, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageVersionsPackageVersionDistributionPackageDistribution) GetWebcSha256Hash() string {
+	return v.WebcSha256Hash
+}
+
+// getAllByUserGetUserPackagesPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type getAllByUserGetUserPackagesPackageConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+}
+
+// GetEndCursor returns getAllByUserGetUserPackagesPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getAllByUserGetUserPackagesPackageConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// getAllByUserResponse is returned by getAllByUser on success.
+type getAllByUserResponse struct {
+	GetUser getAllByUserGetUser `json:"getUser"`
+}
+
+// GetGetUser returns getAllByUserResponse.GetUser, and is useful for accessing the field via an interface.
+func (v *getAllByUserResponse) GetGetUser() getAllByUserGetUser { return v.GetUser }
+
+// getAllPackagesAllPackageVersionsPackageVersionConnection includes the requested fields of the GraphQL type PackageVersionConnection.
+type getAllPackagesAllPackageVersionsPackageVersionConnection struct {
+	// Contains the nodes in this connection.
+	Edges []getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge `json:"edges"`
+	// Pagination data for this connection.
+	PageInfo getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo `json:"pageInfo"`
+}
+
+// GetEdges returns getAllPackagesAllPackageVersionsPackageVersionConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnection) GetEdges() []getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns getAllPackagesAllPackageVersionsPackageVersionConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnection) GetPageInfo() getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo {
+	return v.PageInfo
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge includes the requested fields of the GraphQL type PackageVersionEdge.
+// The GraphQL type's documentation follows.
+//
+// A Relay edge containing a `PackageVersion` and its cursor.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge struct {
+	// The item at the end of the edge
+	Node getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion `json:"node"`
+}
+
+// GetNode returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge.Node, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdge) GetNode() getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion {
+	return v.Node
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion struct {
+	// The ID of the object
+	Id           string                                                                                                                           `json:"id"`
+	Version      string                                                                                                                           `json:"version"`
+	Distribution getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution `json:"distribution"`
+	Package      getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage                         `json:"package"`
+}
+
+// GetId returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion) GetId() string {
+	return v.Id
+}
+
+// GetVersion returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetDistribution returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion) GetDistribution() getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// GetPackage returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion.Package, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersion) GetPackage() getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage {
+	return v.Package
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
+	DownloadUrl     string `json:"downloadUrl"`
+	WebcDownloadUrl string `json:"webcDownloadUrl"`
+	WebcSha256Hash  string `json:"webcSha256Hash"`
+}
+
+// GetDownloadUrl returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetWebcDownloadUrl returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution.WebcDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution) GetWebcDownloadUrl() string {
+	return v.WebcDownloadUrl
+}
+
+// GetWebcSha256Hash returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution.WebcSha256Hash, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionDistributionPackageDistribution) GetWebcSha256Hash() string {
+	return v.WebcSha256Hash
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage includes the requested fields of the GraphQL type Package.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage struct {
+	Name string `json:"name"`
+	// The ID of the object
+	Id    string                                                                                                        `json:"id"`
+	Owner getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner `json:"-"`
+}
+
+// GetName returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage.Name, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) GetName() string {
+	return v.Name
+}
+
+// GetId returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage.Id, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) GetId() string {
+	return v.Id
+}
+
+// GetOwner returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage.Owner, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) GetOwner() getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner {
+	return v.Owner
+}
+
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage
+		Owner json.RawMessage `json:"owner"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Owner
+		src := firstPass.Owner
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage.Owner: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage struct {
+	Name string `json:"name"`
+
+	Id string `json:"id"`
+
+	Owner json.RawMessage `json:"owner"`
+}
+
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage) __premarshalJSON() (*__premarshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage, error) {
+	var retval __premarshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage
+
+	retval.Name = v.Name
+	retval.Id = v.Id
+	{
+
+		dst := &retval.Owner
+		src := v.Owner
+		var err error
+		*dst, err = __marshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackage.Owner: %w", err)
+		}
+	}
+	return &retval, nil
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner includes the requested fields of the GraphQL interface PackageOwner.
+//
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner is implemented by the following types:
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser
+// The GraphQL type's documentation follows.
+//
+// Setup for backwards compatibility with existing frontends.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner interface {
+	implementsGraphQLInterfacegetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner()
+	// GetGlobalName returns the interface-field "globalName" from its implementation.
+	GetGlobalName() string
+	// GetGlobalId returns the interface-field "globalId" from its implementation.
+	GetGlobalId() string
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() string
+}
+
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace) implementsGraphQLInterfacegetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner() {
+}
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage) implementsGraphQLInterfacegetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner() {
+}
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser) implementsGraphQLInterfacegetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner() {
+}
+
+func __unmarshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner(b []byte, v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Namespace":
+		*v = new(getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage)
+		return json.Unmarshal(b, *v)
+	case "User":
+		*v = new(getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageOwner.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalgetAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner(v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace:
+		typename = "Namespace"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace
+		}{typename, v}
+		return json.Marshal(result)
+	case *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage:
+		typename = "Package"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage
+		}{typename, v}
+		return json.Marshal(result)
+	case *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser:
+		typename = "User"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser
+		}{typename, v}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwner: "%T"`, v)
+	}
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace includes the requested fields of the GraphQL type Namespace.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace struct {
+	GlobalName string `json:"globalName"`
+	GlobalId   string `json:"globalId"`
+	Typename   string `json:"__typename"`
+}
+
+// GetGlobalName returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace.GlobalName, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace) GetGlobalName() string {
+	return v.GlobalName
+}
+
+// GetGlobalId returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace.GlobalId, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace) GetGlobalId() string {
+	return v.GlobalId
+}
+
+// GetTypename returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace.Typename, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerNamespace) GetTypename() string {
+	return v.Typename
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage includes the requested fields of the GraphQL type Package.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage struct {
+	GlobalName string `json:"globalName"`
+	GlobalId   string `json:"globalId"`
+	Typename   string `json:"__typename"`
+}
+
+// GetGlobalName returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage.GlobalName, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage) GetGlobalName() string {
+	return v.GlobalName
+}
+
+// GetGlobalId returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage.GlobalId, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage) GetGlobalId() string {
+	return v.GlobalId
+}
+
+// GetTypename returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage.Typename, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerPackage) GetTypename() string {
+	return v.Typename
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser includes the requested fields of the GraphQL type User.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser struct {
+	GlobalName string `json:"globalName"`
+	GlobalId   string `json:"globalId"`
+	Typename   string `json:"__typename"`
+}
+
+// GetGlobalName returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser.GlobalName, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser) GetGlobalName() string {
+	return v.GlobalName
+}
+
+// GetGlobalId returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser.GlobalId, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser) GetGlobalId() string {
+	return v.GlobalId
+}
+
+// GetTypename returns getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser.Typename, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionEdgesPackageVersionEdgeNodePackageVersionPackageOwnerUser) GetTypename() string {
+	return v.Typename
+}
+
+// getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+}
+
+// GetEndCursor returns getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getAllPackagesAllPackageVersionsPackageVersionConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// getAllPackagesResponse is returned by getAllPackages on success.
+type getAllPackagesResponse struct {
+	AllPackageVersions getAllPackagesAllPackageVersionsPackageVersionConnection `json:"allPackageVersions"`
+}
+
+// GetAllPackageVersions returns getAllPackagesResponse.AllPackageVersions, and is useful for accessing the field via an interface.
+func (v *getAllPackagesResponse) GetAllPackageVersions() getAllPackagesAllPackageVersionsPackageVersionConnection {
+	return v.AllPackageVersions
+}
+
+// getLatestByNamespaceGetNamespace includes the requested fields of the GraphQL type Namespace.
+type getLatestByNamespaceGetNamespace struct {
+	// The ID of the object
+	Id       string                                                    `json:"id"`
+	Packages getLatestByNamespaceGetNamespacePackagesPackageConnection `json:"packages"`
+}
+
+// GetId returns getLatestByNamespaceGetNamespace.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespace) GetId() string { return v.Id }
+
+// GetPackages returns getLatestByNamespaceGetNamespace.Packages, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespace) GetPackages() getLatestByNamespaceGetNamespacePackagesPackageConnection {
+	return v.Packages
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+type getLatestByNamespaceGetNamespacePackagesPackageConnection struct {
+	// Pagination data for this connection.
+	PageInfo getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo `json:"pageInfo"`
+	// Contains the nodes in this connection.
+	Edges []getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge `json:"edges"`
+}
+
+// GetPageInfo returns getLatestByNamespaceGetNamespacePackagesPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnection) GetPageInfo() getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns getLatestByNamespaceGetNamespacePackagesPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnection) GetEdges() []getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// A Relay edge containing a `Package` and its cursor.
+type getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge struct {
+	// The item at the end of the edge
+	Node getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetNode returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdge) GetNode() getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+type getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage struct {
+	// The ID of the object
+	Id string `json:"id"`
+	// The name of the package without the owner
+	PackageName string                                                                                                        `json:"packageName"`
+	LastVersion getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion `json:"lastVersion"`
+}
+
+// GetId returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.Id
+}
+
+// GetPackageName returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.PackageName, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetPackageName() string {
+	return v.PackageName
+}
+
+// GetLastVersion returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage.LastVersion, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackage) GetLastVersion() getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion {
+	return v.LastVersion
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion struct {
+	// The ID of the object
+	Id           string                                                                                                                                       `json:"id"`
+	Version      string                                                                                                                                       `json:"version"`
+	Distribution getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetId() string {
+	return v.Id
+}
+
+// GetVersion returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetDistribution returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetDistribution() getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
+	DownloadUrl     string `json:"downloadUrl"`
+	WebcDownloadUrl string `json:"webcDownloadUrl"`
+	WebcSha256Hash  string `json:"webcSha256Hash"`
+}
+
+// GetDownloadUrl returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetWebcDownloadUrl returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.WebcDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetWebcDownloadUrl() string {
+	return v.WebcDownloadUrl
+}
+
+// GetWebcSha256Hash returns getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.WebcSha256Hash, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetWebcSha256Hash() string {
+	return v.WebcSha256Hash
+}
+
+// getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+}
+
+// GetEndCursor returns getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceGetNamespacePackagesPackageConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// getLatestByNamespaceResponse is returned by getLatestByNamespace on success.
+type getLatestByNamespaceResponse struct {
+	GetNamespace getLatestByNamespaceGetNamespace `json:"getNamespace"`
+}
+
+// GetGetNamespace returns getLatestByNamespaceResponse.GetNamespace, and is useful for accessing the field via an interface.
+func (v *getLatestByNamespaceResponse) GetGetNamespace() getLatestByNamespaceGetNamespace {
+	return v.GetNamespace
+}
+
+// getLatestByUserGetUser includes the requested fields of the GraphQL type User.
+type getLatestByUserGetUser struct {
+	// The ID of the object
+	Id       string                                          `json:"id"`
+	Packages getLatestByUserGetUserPackagesPackageConnection `json:"packages"`
+}
+
+// GetId returns getLatestByUserGetUser.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUser) GetId() string { return v.Id }
+
+// GetPackages returns getLatestByUserGetUser.Packages, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUser) GetPackages() getLatestByUserGetUserPackagesPackageConnection {
+	return v.Packages
+}
+
+// getLatestByUserGetUserPackagesPackageConnection includes the requested fields of the GraphQL type PackageConnection.
+type getLatestByUserGetUserPackagesPackageConnection struct {
+	// Pagination data for this connection.
+	PageInfo getLatestByUserGetUserPackagesPackageConnectionPageInfo `json:"pageInfo"`
+	// Contains the nodes in this connection.
+	Edges []getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge `json:"edges"`
+}
+
+// GetPageInfo returns getLatestByUserGetUserPackagesPackageConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnection) GetPageInfo() getLatestByUserGetUserPackagesPackageConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetEdges returns getLatestByUserGetUserPackagesPackageConnection.Edges, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnection) GetEdges() []getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge {
+	return v.Edges
+}
+
+// getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge includes the requested fields of the GraphQL type PackageEdge.
+// The GraphQL type's documentation follows.
+//
+// A Relay edge containing a `Package` and its cursor.
+type getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge struct {
+	// The item at the end of the edge
+	Node getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage `json:"node"`
+}
+
+// GetNode returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge.Node, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdge) GetNode() getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage {
+	return v.Node
+}
+
+// getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage includes the requested fields of the GraphQL type Package.
+type getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage struct {
+	// The ID of the object
+	Id string `json:"id"`
+	// The name of the package without the owner
+	PackageName string                                                                                              `json:"packageName"`
+	LastVersion getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion `json:"lastVersion"`
+}
+
+// GetId returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetId() string {
+	return v.Id
+}
+
+// GetPackageName returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.PackageName, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetPackageName() string {
+	return v.PackageName
+}
+
+// GetLastVersion returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage.LastVersion, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackage) GetLastVersion() getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion {
+	return v.LastVersion
+}
+
+// getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+type getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion struct {
+	// The ID of the object
+	Id           string                                                                                                                             `json:"id"`
+	Version      string                                                                                                                             `json:"version"`
+	Distribution getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution `json:"distribution"`
+}
+
+// GetId returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetId() string {
+	return v.Id
+}
+
+// GetVersion returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetDistribution returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion.Distribution, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersion) GetDistribution() getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution {
+	return v.Distribution
+}
+
+// getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
+type getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
+	DownloadUrl     string `json:"downloadUrl"`
+	WebcDownloadUrl string `json:"webcDownloadUrl"`
+	WebcSha256Hash  string `json:"webcSha256Hash"`
+}
+
+// GetDownloadUrl returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.DownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetDownloadUrl() string {
+	return v.DownloadUrl
+}
+
+// GetWebcDownloadUrl returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.WebcDownloadUrl, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetWebcDownloadUrl() string {
+	return v.WebcDownloadUrl
+}
+
+// GetWebcSha256Hash returns getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution.WebcSha256Hash, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionEdgesPackageEdgeNodePackageLastVersionPackageVersionDistributionPackageDistribution) GetWebcSha256Hash() string {
+	return v.WebcSha256Hash
+}
+
+// getLatestByUserGetUserPackagesPackageConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type getLatestByUserGetUserPackagesPackageConnectionPageInfo struct {
+	// When paginating forwards, the cursor to continue.
+	EndCursor string `json:"endCursor"`
+}
+
+// GetEndCursor returns getLatestByUserGetUserPackagesPackageConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *getLatestByUserGetUserPackagesPackageConnectionPageInfo) GetEndCursor() string {
+	return v.EndCursor
+}
+
+// getLatestByUserResponse is returned by getLatestByUser on success.
+type getLatestByUserResponse struct {
+	GetUser getLatestByUserGetUser `json:"getUser"`
+}
+
+// GetGetUser returns getLatestByUserResponse.GetUser, and is useful for accessing the field via an interface.
+func (v *getLatestByUserResponse) GetGetUser() getLatestByUserGetUser { return v.GetUser }
 
 // getLatestVersionGetPackage includes the requested fields of the GraphQL type Package.
 type getLatestVersionGetPackage struct {
@@ -59,6 +1042,8 @@ func (v *getLatestVersionGetPackageLastVersionPackageVersion) GetDistribution() 
 
 // getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
 type getLatestVersionGetPackageLastVersionPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
 	DownloadUrl       string `json:"downloadUrl"`
 	PiritaDownloadUrl string `json:"piritaDownloadUrl"`
 }
@@ -98,6 +1083,8 @@ func (v *getVersionGetPackageVersion) GetDistribution() getVersionGetPackageVers
 
 // getVersionGetPackageVersionDistributionPackageDistribution includes the requested fields of the GraphQL type PackageDistribution.
 type getVersionGetPackageVersionDistributionPackageDistribution struct {
+	// Download URL of the tar.gz file.
+	// If the package was published with webc only,this will contain download URL for webc file instead.
 	DownloadUrl       string `json:"downloadUrl"`
 	PiritaDownloadUrl string `json:"piritaDownloadUrl"`
 }
@@ -120,6 +1107,291 @@ type getVersionResponse struct {
 // GetGetPackageVersion returns getVersionResponse.GetPackageVersion, and is useful for accessing the field via an interface.
 func (v *getVersionResponse) GetGetPackageVersion() getVersionGetPackageVersion {
 	return v.GetPackageVersion
+}
+
+// The query or mutation executed by getAllByNamespace.
+const getAllByNamespace_Operation = `
+query getAllByNamespace ($name: String!, $after: String) {
+	getNamespace(name: $name) {
+		id
+		packages(after: $after) {
+			pageInfo {
+				endCursor
+			}
+			edges {
+				node {
+					id
+					packageName
+					versions {
+						id
+						version
+						distribution {
+							downloadUrl
+							webcDownloadUrl
+							webcSha256Hash
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func getAllByNamespace(
+	ctx context.Context,
+	client graphql.Client,
+	name string,
+	after string,
+) (*getAllByNamespaceResponse, error) {
+	req := &graphql.Request{
+		OpName: "getAllByNamespace",
+		Query:  getAllByNamespace_Operation,
+		Variables: &__getAllByNamespaceInput{
+			Name:  name,
+			After: after,
+		},
+	}
+	var err error
+
+	var data getAllByNamespaceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by getAllByUser.
+const getAllByUser_Operation = `
+query getAllByUser ($name: String!, $after: String) {
+	getUser(username: $name) {
+		id
+		packages(after: $after) {
+			pageInfo {
+				endCursor
+			}
+			edges {
+				node {
+					id
+					packageName
+					versions {
+						id
+						version
+						distribution {
+							downloadUrl
+							webcDownloadUrl
+							webcSha256Hash
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func getAllByUser(
+	ctx context.Context,
+	client graphql.Client,
+	name string,
+	after string,
+) (*getAllByUserResponse, error) {
+	req := &graphql.Request{
+		OpName: "getAllByUser",
+		Query:  getAllByUser_Operation,
+		Variables: &__getAllByUserInput{
+			Name:  name,
+			After: after,
+		},
+	}
+	var err error
+
+	var data getAllByUserResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by getAllPackages.
+const getAllPackages_Operation = `
+query getAllPackages ($after: String) {
+	allPackageVersions(after: $after) {
+		edges {
+			node {
+				id
+				version
+				distribution {
+					downloadUrl
+					webcDownloadUrl
+					webcSha256Hash
+				}
+				package {
+					name
+					id
+					owner {
+						globalName
+						globalId
+						__typename
+					}
+				}
+			}
+		}
+		pageInfo {
+			endCursor
+		}
+	}
+}
+`
+
+func getAllPackages(
+	ctx context.Context,
+	client graphql.Client,
+	after string,
+) (*getAllPackagesResponse, error) {
+	req := &graphql.Request{
+		OpName: "getAllPackages",
+		Query:  getAllPackages_Operation,
+		Variables: &__getAllPackagesInput{
+			After: after,
+		},
+	}
+	var err error
+
+	var data getAllPackagesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by getLatestByNamespace.
+const getLatestByNamespace_Operation = `
+query getLatestByNamespace ($name: String!, $after: String) {
+	getNamespace(name: $name) {
+		id
+		packages(after: $after) {
+			pageInfo {
+				endCursor
+			}
+			edges {
+				node {
+					id
+					packageName
+					lastVersion {
+						id
+						version
+						distribution {
+							downloadUrl
+							webcDownloadUrl
+							webcSha256Hash
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func getLatestByNamespace(
+	ctx context.Context,
+	client graphql.Client,
+	name string,
+	after string,
+) (*getLatestByNamespaceResponse, error) {
+	req := &graphql.Request{
+		OpName: "getLatestByNamespace",
+		Query:  getLatestByNamespace_Operation,
+		Variables: &__getLatestByNamespaceInput{
+			Name:  name,
+			After: after,
+		},
+	}
+	var err error
+
+	var data getLatestByNamespaceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by getLatestByUser.
+const getLatestByUser_Operation = `
+query getLatestByUser ($name: String!, $after: String) {
+	getUser(username: $name) {
+		id
+		packages(after: $after) {
+			pageInfo {
+				endCursor
+			}
+			edges {
+				node {
+					id
+					packageName
+					lastVersion {
+						id
+						version
+						distribution {
+							downloadUrl
+							webcDownloadUrl
+							webcSha256Hash
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func getLatestByUser(
+	ctx context.Context,
+	client graphql.Client,
+	name string,
+	after string,
+) (*getLatestByUserResponse, error) {
+	req := &graphql.Request{
+		OpName: "getLatestByUser",
+		Query:  getLatestByUser_Operation,
+		Variables: &__getLatestByUserInput{
+			Name:  name,
+			After: after,
+		},
+	}
+	var err error
+
+	var data getLatestByUserResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
 }
 
 // The query or mutation executed by getLatestVersion.

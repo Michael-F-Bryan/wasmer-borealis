@@ -14,7 +14,7 @@ import (
 
 func TestGraphQLServer_GetExperiments(t *testing.T) {
 	server := NewServer(testDb(t), zaptest.NewLogger(t), dummyCache{})
-	experiments := []RunningExperiment{
+	experiments := []Experiment{
 		{Definition: "first"},
 		{Definition: "second"},
 	}
@@ -24,7 +24,7 @@ func TestGraphQLServer_GetExperiments(t *testing.T) {
 	result, err := server.resolveGetExperiments(graphql.ResolveParams{})
 
 	assert.NoError(t, err)
-	resolvedExperiment := result.([]RunningExperiment)
+	resolvedExperiment := result.([]Experiment)
 	assert.Equal(t, len(experiments), len(resolvedExperiment))
 	assert.Equal(t, experiments[0].ID, resolvedExperiment[0].ID)
 	assert.Equal(t, experiments[0].Definition, resolvedExperiment[0].Definition)
@@ -34,7 +34,7 @@ func TestGraphQLServer_GetExperiments(t *testing.T) {
 
 func TestGraphQLServer_GetExperiment(t *testing.T) {
 	server := NewServer(testDb(t), zaptest.NewLogger(t), dummyCache{})
-	exp := RunningExperiment{Definition: "asdf"}
+	exp := Experiment{Definition: "asdf"}
 	assert.NoError(t, server.db.Save(&exp).Error)
 
 	result, err := server.resolveGetExperiment(graphql.ResolveParams{
@@ -44,7 +44,7 @@ func TestGraphQLServer_GetExperiment(t *testing.T) {
 	})
 
 	assert.NoError(t, err)
-	resolvedExperiment := result.(RunningExperiment)
+	resolvedExperiment := result.(Experiment)
 	*exp.CreatedAt.Location() = *resolvedExperiment.CreatedAt.Location()
 	*exp.UpdatedAt.Location() = *resolvedExperiment.UpdatedAt.Location()
 	assert.Equal(t, exp, resolvedExperiment)

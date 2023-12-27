@@ -926,11 +926,21 @@ type PackageVersionPythonBinding implements PackageVersionLanguageBinding & Node
 }
 
 type PackageDistribution {
-  downloadUrl: String
+  """
+  Download URL of the tar.gz file.
+  If the package was published with webc only,this will contain download URL for webc file instead.
+  """
+  downloadUrl: String!
+  expiresInSeconds: Int
   size: Int
   piritaDownloadUrl: String
+  piritaExpiresInSeconds: Int
   piritaSize: Int
   piritaSha256Hash: String
+  webcDownloadUrl: String
+  webcExpiresInSeconds: Int
+  webcSize: Int
+  webcSha256Hash: String
 }
 
 type PackageVersionFilesystem {
@@ -1651,7 +1661,7 @@ type Query {
   getAppByGlobalAlias(alias: String!): DeployApp
   getDeployApps(sortBy: DeployAppsSortBy, updatedAfter: DateTime, offset: Int, before: String, after: String, first: Int, last: Int): DeployAppConnection!
   getAppVersions(sortBy: DeployAppVersionsSortBy, updatedAfter: DateTime, offset: Int, before: String, after: String, first: Int, last: Int): DeployAppVersionConnection!
-  getAppTemplates(category: ID, offset: Int, before: String, after: String, first: Int, last: Int): AppTemplateConnection!
+  getAppTemplates(categorySlug: String, offset: Int, before: String, after: String, first: Int, last: Int): AppTemplateConnection!
   getAppTemplate(slug: String!): AppTemplate!
   getAppTemplateCategories(offset: Int, before: String, after: String, first: Int, last: Int): AppTemplateCategoryConnection!
   viewer: User
@@ -1734,12 +1744,14 @@ type AppTemplate implements Node {
   isPublic: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  readme: String!
 }
 
 type AppTemplateCategory implements Node {
   """The ID of the object"""
   id: ID!
   name: String!
+  slug: String!
   description: String!
   createdAt: DateTime!
   updatedAt: DateTime!

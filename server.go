@@ -41,27 +41,46 @@ func (s *Server) Router() http.Handler {
 }
 
 func (s *Server) graphqlSchema() graphql.Schema {
+	dbObject := graphql.NewInterface(graphql.InterfaceConfig{
+		Name: "DatabaseObject",
+		Fields: graphql.Fields{
+			"ID": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "The object's ID",
+			},
+			"CreatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was created",
+			},
+			"UpdatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was last updated",
+			},
+		},
+	})
+	testCase := graphql.NewObject(graphql.ObjectConfig{
+		Name: "TestCase",
+		Fields: graphql.Fields{
+			"State": &graphql.Field{
+				Type: graphql.String,
+			},
+		},
+		Interfaces: []*graphql.Interface{dbObject},
+	})
 	experimentType := graphql.NewObject(graphql.ObjectConfig{
 		Name:        "Experiment",
 		Description: "Information about a running experiment",
 		Fields: graphql.Fields{
-			"ID": &graphql.Field{
-				Type:        graphql.Int,
-				Description: "The experiment ID",
-			},
-			"CreatedAt": &graphql.Field{
-				Type:        graphql.DateTime,
-				Description: "When this experiment was created",
-			},
-			"UpdatedAt": &graphql.Field{
-				Type:        graphql.DateTime,
-				Description: "When this experiment was last updated",
-			},
 			"Definition": &graphql.Field{
 				Type:        graphql.String,
 				Description: "The raw JSON definition for this experiment",
 			},
+			"TestCases": &graphql.Field{
+				Type:    graphql.NewList(testCase),
+				Resolve: s.resolveTestCases,
+			},
 		},
+		Interfaces: []*graphql.Interface{dbObject},
 	})
 
 	rootQuery := graphql.NewObject(graphql.ObjectConfig{
@@ -89,7 +108,7 @@ func (s *Server) graphqlSchema() graphql.Schema {
 		Query: rootQuery,
 	})
 	if err != nil {
-		s.logger.Panic("The GraphQL schema is invalid")
+		s.logger.Panic("The GraphQL schema is invalid", zap.Error(err))
 	}
 
 	return schema
@@ -98,7 +117,7 @@ func (s *Server) graphqlSchema() graphql.Schema {
 func (s *Server) resolveGetExperiments(p graphql.ResolveParams) (interface{}, error) {
 	s.logger.Info("Resolving experiments")
 
-	var experiments []RunningExperiment
+	var experiments []Experiment
 	if err := s.db.WithContext(p.Context).Find(&experiments).Error; err != nil {
 		return nil, err
 	}
@@ -114,10 +133,22 @@ func (s *Server) resolveGetExperiment(p graphql.ResolveParams) (interface{}, err
 
 	s.logger.Info("Resolving experiment", zap.Int("id", id))
 
-	var exp RunningExperiment
+	var exp Experiment
 	if err := s.db.WithContext(p.Context).Where("id = ?", id).First(&exp).Error; err != nil {
 		return nil, err
 	}
 
 	return exp, nil
+}
+
+func (s *Server) resolveTestCases(p graphql.ResolveParams) (interface{}, error) {
+	exp := p.Info.RootValue.(Experiment)
+
+	filter := TestCase{ExperimentID: exp.ID}
+	var testCases []TestCase
+	if err := s.db.Where(&filter).Scan(&testCases).Error; err != nil {
+		return nil, err
+	}
+
+	return testCases, nil
 }

@@ -20,7 +20,7 @@ func main() {
 	flag.StringVar(&output, "out", "experiment.schema.json", "Where to save the generated JSON schema")
 	flag.Parse()
 
-	schema := jsonschema.Reflect(&wasmer_borealis.Experiment{})
+	schema := jsonschema.Reflect(&wasmer_borealis.Config{})
 
 	schemaJson, err := schema.MarshalJSON()
 	if err != nil {
