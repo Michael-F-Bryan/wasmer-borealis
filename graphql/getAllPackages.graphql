@@ -10,7 +10,7 @@ query getAllPackages($after: String) {
           webcSha256Hash
         }
         package {
-          name
+          packageName
           id
           owner {
             globalName

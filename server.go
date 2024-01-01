@@ -1,8 +1,11 @@
 package wasmer_borealis
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/graphql"
@@ -11,36 +14,42 @@ import (
 	"gorm.io/gorm"
 )
 
-type Server struct {
-	db     *gorm.DB
-	logger *zap.Logger
-	cache  packageCache
-}
-
 func NewServer(
 	db *gorm.DB,
 	logger *zap.Logger,
-	cache packageCache,
-) *Server {
-	return &Server{db, logger, cache}
-}
-
-func (s *Server) Router() http.Handler {
+) http.Handler {
 	r := mux.NewRouter()
 
-	schema := s.graphqlSchema()
+	r.Use(
+		WrapContextMiddleware(
+			SetRequestID(),
+			SetLogger(logger),
+			SetDatabase(db),
+		),
+		requestIDMiddleware(),
+		serverHeaderMiddleware(),
+		loggingMiddleware(),
+		mux.CORSMethodMiddleware(r),
+	)
+
+	schema, err := graphqlSchema()
+	if err != nil {
+		logger.Panic("The GraphQL schema is invalid", zap.Error(err))
+	}
 
 	r.Handle("/graphql", handler.New(&handler.Config{
 		Schema:     &schema,
 		Pretty:     true,
 		GraphiQL:   true,
 		Playground: true,
-	}))
+	})).Methods(http.MethodGet, http.MethodPost, http.MethodOptions, http.MethodHead)
+
+	r.HandleFunc("/healthz", healthcheck).Methods(http.MethodOptions, http.MethodGet, http.MethodHead)
 
 	return r
 }
 
-func (s *Server) graphqlSchema() graphql.Schema {
+func graphqlSchema() (graphql.Schema, error) {
 	dbObject := graphql.NewInterface(graphql.InterfaceConfig{
 		Name: "DatabaseObject",
 		Fields: graphql.Fields{
@@ -61,6 +70,18 @@ func (s *Server) graphqlSchema() graphql.Schema {
 	testCase := graphql.NewObject(graphql.ObjectConfig{
 		Name: "TestCase",
 		Fields: graphql.Fields{
+			"ID": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "The object's ID",
+			},
+			"CreatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was created",
+			},
+			"UpdatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was last updated",
+			},
 			"State": &graphql.Field{
 				Type: graphql.String,
 			},
@@ -71,13 +92,25 @@ func (s *Server) graphqlSchema() graphql.Schema {
 		Name:        "Experiment",
 		Description: "Information about a running experiment",
 		Fields: graphql.Fields{
+			"ID": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "The object's ID",
+			},
+			"CreatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was created",
+			},
+			"UpdatedAt": &graphql.Field{
+				Type:        graphql.DateTime,
+				Description: "When this object was last updated",
+			},
 			"Definition": &graphql.Field{
 				Type:        graphql.String,
 				Description: "The raw JSON definition for this experiment",
 			},
 			"TestCases": &graphql.Field{
 				Type:    graphql.NewList(testCase),
-				Resolve: s.resolveTestCases,
+				Resolve: resolveTestCases,
 			},
 		},
 		Interfaces: []*graphql.Interface{dbObject},
@@ -89,7 +122,7 @@ func (s *Server) graphqlSchema() graphql.Schema {
 			"getExperiment": &graphql.Field{
 				Description: "Get an experiment by ID",
 				Type:        experimentType,
-				Resolve:     s.resolveGetExperiment,
+				Resolve:     resolveGetExperiment,
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
 						Type: graphql.Int,
@@ -99,56 +132,99 @@ func (s *Server) graphqlSchema() graphql.Schema {
 			"getExperiments": &graphql.Field{
 				Description: "List all known experiments",
 				Type:        graphql.NewList(experimentType),
-				Resolve:     s.resolveGetExperiments,
+				Resolve:     resolveGetExperiments,
 			},
 		},
 	})
 
-	schema, err := graphql.NewSchema(graphql.SchemaConfig{
+	return graphql.NewSchema(graphql.SchemaConfig{
 		Query: rootQuery,
 	})
-	if err != nil {
-		s.logger.Panic("The GraphQL schema is invalid", zap.Error(err))
-	}
-
-	return schema
 }
 
-func (s *Server) resolveGetExperiments(p graphql.ResolveParams) (interface{}, error) {
-	s.logger.Info("Resolving experiments")
+func resolveGetExperiments(p graphql.ResolveParams) (interface{}, error) {
+	db := GetDatabase(p.Context)
+	logger := GetLogger(p.Context)
+
+	logger.Info("Resolving experiments")
 
 	var experiments []Experiment
-	if err := s.db.WithContext(p.Context).Find(&experiments).Error; err != nil {
+	if err := db.WithContext(p.Context).Find(&experiments).Error; err != nil {
 		return nil, err
 	}
 
 	return experiments, nil
 }
 
-func (s *Server) resolveGetExperiment(p graphql.ResolveParams) (interface{}, error) {
+func resolveGetExperiment(p graphql.ResolveParams) (interface{}, error) {
+	db := GetDatabase(p.Context)
+	logger := GetLogger(p.Context)
+
 	id, ok := p.Args["id"].(int)
 	if !ok {
 		return nil, errors.New("missing ID")
 	}
 
-	s.logger.Info("Resolving experiment", zap.Int("id", id))
+	logger.Info("Resolving experiment", zap.Int("id", id))
 
 	var exp Experiment
-	if err := s.db.WithContext(p.Context).Where("id = ?", id).First(&exp).Error; err != nil {
+	if err := db.WithContext(p.Context).Where("id = ?", id).First(&exp).Error; err != nil {
 		return nil, err
 	}
 
 	return exp, nil
 }
 
-func (s *Server) resolveTestCases(p graphql.ResolveParams) (interface{}, error) {
+func resolveTestCases(p graphql.ResolveParams) (interface{}, error) {
+	db := GetDatabase(p.Context)
 	exp := p.Info.RootValue.(Experiment)
 
 	filter := TestCase{ExperimentID: exp.ID}
 	var testCases []TestCase
-	if err := s.db.Where(&filter).Scan(&testCases).Error; err != nil {
+	if err := db.Where(&filter).Scan(&testCases).Error; err != nil {
 		return nil, err
 	}
 
 	return testCases, nil
+}
+
+func healthcheck(w http.ResponseWriter, r *http.Request) {
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	var response healthCheckResponse
+
+	db, err := GetDatabase(r.Context()).DB()
+	if err != nil {
+		response.Database.Error = err
+	} else if err = db.PingContext(ctx); err != nil {
+		response.Database.Error = err
+	} else {
+		response.Database.Ok = true
+	}
+
+	response.Ok = response.Database.Ok
+
+	w.Header().Add("Content-Type", "application/json")
+
+	if response.Ok {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	if err := json.NewEncoder(w).Encode(&response); err != nil {
+		GetLogger(r.Context()).Error("Unable to write the healthcheck", zap.Error(err))
+	}
+}
+
+type healthCheckResponse struct {
+	Ok       bool     `json:"ok"`
+	Database dbHealth `json:"db"`
+}
+
+type dbHealth struct {
+	Ok    bool  `json:"ok"`
+	Error error `json:"error,omitempty"`
 }

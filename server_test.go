@@ -2,26 +2,44 @@ package wasmer_borealis
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/graphql-go/graphql"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
+func testFixtures(t *testing.T) (*gorm.DB, *zap.Logger, context.Context) {
+	db := testDb(t)
+	logger := zaptest.NewLogger(t)
+	ctx := WrapContext(
+		context.Background(),
+		SetRequestID(),
+		SetDatabase(db),
+		SetLogger(logger),
+	)
+
+	return db, logger, ctx
+}
+
 func TestGraphQLServer_GetExperiments(t *testing.T) {
-	server := NewServer(testDb(t), zaptest.NewLogger(t), dummyCache{})
+	db, _, ctx := testFixtures(t)
 	experiments := []Experiment{
 		{Definition: "first"},
 		{Definition: "second"},
 	}
-	assert.NoError(t, server.db.Save(&experiments[0]).Error)
-	assert.NoError(t, server.db.Save(&experiments[1]).Error)
+	assert.NoError(t, db.Save(&experiments[0]).Error)
+	assert.NoError(t, db.Save(&experiments[1]).Error)
 
-	result, err := server.resolveGetExperiments(graphql.ResolveParams{})
+	result, err := resolveGetExperiments(graphql.ResolveParams{
+		Context: ctx,
+	})
 
 	assert.NoError(t, err)
 	resolvedExperiment := result.([]Experiment)
@@ -33,14 +51,15 @@ func TestGraphQLServer_GetExperiments(t *testing.T) {
 }
 
 func TestGraphQLServer_GetExperiment(t *testing.T) {
-	server := NewServer(testDb(t), zaptest.NewLogger(t), dummyCache{})
+	db, _, ctx := testFixtures(t)
 	exp := Experiment{Definition: "asdf"}
-	assert.NoError(t, server.db.Save(&exp).Error)
+	assert.NoError(t, db.Save(&exp).Error)
 
-	result, err := server.resolveGetExperiment(graphql.ResolveParams{
+	result, err := resolveGetExperiment(graphql.ResolveParams{
 		Args: map[string]any{
 			"id": int(exp.ID),
 		},
+		Context: ctx,
 	})
 
 	assert.NoError(t, err)
@@ -48,6 +67,29 @@ func TestGraphQLServer_GetExperiment(t *testing.T) {
 	*exp.CreatedAt.Location() = *resolvedExperiment.CreatedAt.Location()
 	*exp.UpdatedAt.Location() = *resolvedExperiment.UpdatedAt.Location()
 	assert.Equal(t, exp, resolvedExperiment)
+}
+
+func TestHealthcheck(t *testing.T) {
+	db, logger, _ := testFixtures(t)
+	server := NewServer(db, logger)
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+
+	server.ServeHTTP(w, r)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var deserializedResponse healthCheckResponse
+	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &deserializedResponse))
+	assert.Equal(
+		t,
+		healthCheckResponse{
+			Ok: true,
+			Database: dbHealth{
+				Ok: true,
+			},
+		},
+		deserializedResponse,
+	)
 }
 
 func testDb(t *testing.T) *gorm.DB {
@@ -62,10 +104,4 @@ func testDb(t *testing.T) *gorm.DB {
 	}
 
 	return db
-}
-
-type dummyCache struct{}
-
-func (d dummyCache) lookup(ctx context.Context, pkg packageName, version string) (cachedPackage, error) {
-	return cachedPackage{}, errors.New("Unimplemented")
 }

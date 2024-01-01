@@ -103,7 +103,7 @@ func (t *TestCaseState) UnmarshalJSON(data []byte) error {
 	case "succeeded":
 		*t = TestCaseStateSucceeded
 	default:
-		return fmt.Errorf("Unknown test case state: %s", s)
+		return fmt.Errorf("unknown test case state: %s", s)
 	}
 
 	return nil
@@ -119,33 +119,31 @@ type Outcome struct {
 
 type Registry struct {
 	gorm.Model
-	Endpoint string
+	Endpoint string `gorm:"unique"`
 	Token    string
 	Owners   []Owner
 }
 
 type Owner struct {
 	gorm.Model
-	Name       string
+	RegistryID uint   `gorm:"index:idx_owner,unique"`
+	Name       string `gorm:"index:idx_owner,unique"`
 	OwnerType  OwnerType
-	UpstreamID string
-	RegistryID uint
 	Packages   []Package
 }
 
 type Package struct {
 	gorm.Model
-	Name       string
-	UpstreamID string
-	OwnerID    uint
-	Versions   []PackageVersion
+	OwnerID  uint   `gorm:"index:idx_package,unique"`
+	Name     string `gorm:"index:idx_package,unique"`
+	Versions []PackageVersion
 }
 
 type PackageVersion struct {
 	gorm.Model
-	Version    string
-	PackageID  uint
-	UpstreamID string `gorm:"uniqueIndex"`
+	PackageID  uint   `gorm:"index:idx_package_version,unique"`
+	Version    string `gorm:"index:idx_package_version,unique"`
+	UpstreamID string
 	WebcId     uint
 	Webc       *Blob
 	TarballId  uint
@@ -158,12 +156,12 @@ type Blob struct {
 	Bytes  []byte
 }
 
-type OwnerType int
+type OwnerType int64
 
 const (
-	OwnerUser      = iota
-	OwnerNamespace = iota
-	ownerUnknown   = iota
+	OwnerUser      OwnerType = iota
+	OwnerNamespace OwnerType = iota
+	ownerUnknown   OwnerType = iota
 )
 
 func (t OwnerType) String() string {
@@ -178,9 +176,9 @@ func (t OwnerType) String() string {
 }
 
 func (t *OwnerType) Scan(value interface{}) error {
-	raw, ok := value.(int)
+	raw, ok := value.(int64)
 	if !ok {
-		return fmt.Errorf("expected an integer, found %v", value)
+		return fmt.Errorf("expected an integer, found %v (%t)", value, value)
 	}
 
 	*t = OwnerType(raw)

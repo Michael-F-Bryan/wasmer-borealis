@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Michael-F-Bryan/wasmer-borealis/experiment",
-  "$ref": "#/$defs/Experiment",
+  "$id": "https://github.com/Michael-F-Bryan/wasmer-borealis/config",
+  "$ref": "#/$defs/Config",
   "$defs": {
-    "Experiment": {
+    "Config": {
       "properties": {
         "package": {
           "type": "string"

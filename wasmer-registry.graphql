@@ -56,6 +56,8 @@ type User implements Node & PackageOwner & Owner {
   notifications(before: String, after: String, first: Int, last: Int): UserNotificationConnection!
   dashboardActivity(offset: Int, before: String, after: String, first: Int, last: Int): ActivityEventConnection!
   loginMethods: [LoginMethod!]!
+  githubUser: SocialAuth
+  githubScopes: [String]!
 }
 
 """Setup for backwards compatibility with existing frontends."""
@@ -1407,6 +1409,18 @@ enum LoginMethod {
   PASSWORD
 }
 
+type SocialAuth implements Node {
+  """The ID of the object"""
+  id: ID!
+  user: User!
+  provider: String!
+  uid: String!
+  extraData: JSONString!
+  created: DateTime!
+  modified: DateTime!
+  username: String!
+}
+
 type Signature {
   id: ID!
   publicKey: PublicKey!
@@ -1668,6 +1682,9 @@ type Query {
   getUser(username: String!): User
   getPasswordResetToken(token: String!): GetPasswordResetToken
   getAuthNonce(name: String!): Nonce
+
+  """Can the logged in user create app templates?"""
+  canDeployAppToGithub: Boolean!
   packages(offset: Int, before: String, after: String, first: Int, last: Int): PackageConnection
   recentPackageVersions(curated: Boolean, offset: Int, before: String, after: String, first: Int, last: Int): PackageVersionConnection!
   allPackageVersions(sortBy: PackageVersionSortBy, createdAfter: DateTime, updatedAfter: DateTime, offset: Int, before: String, after: String, first: Int, last: Int): PackageVersionConnection!
@@ -1739,12 +1756,17 @@ type AppTemplate implements Node {
   description: String!
   demoUrl: String!
   repoUrl: String!
-  defaultImage: String
   category: AppTemplateCategory!
   isPublic: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   readme: String!
+  useCases: JSONString!
+  framework: String!
+  language: String!
+  repoLicense: String!
+  usingPackage: Package
+  defaultImage: String
 }
 
 type AppTemplateCategory implements Node {
@@ -2450,7 +2472,7 @@ input RemoveAppTransferRequestInput {
 
 type CreateRepoForAppTemplatePayload {
   success: Boolean!
-  app: DeployApp
+  repoId: ID!
   clientMutationId: String
 }
 
@@ -2458,6 +2480,7 @@ input CreateRepoForAppTemplateInput {
   templateId: ID!
   name: String!
   namespace: String!
+  private: Boolean = false
   clientMutationId: String
 }
 
@@ -2533,17 +2556,6 @@ type SocialAuthJWTPayload {
   social: SocialAuth
   token: String
   clientMutationId: String
-}
-
-type SocialAuth implements Node {
-  """The ID of the object"""
-  id: ID!
-  user: User!
-  provider: String!
-  uid: String!
-  extraData: String!
-  created: DateTime!
-  modified: DateTime!
 }
 
 input SocialAuthJWTInput {
@@ -3151,6 +3163,8 @@ type Subscription {
     """
     untilISO: DateTime
   ): Log!
+  waitOnRepoCreation(repoId: ID!): Boolean!
+  appIsPublishedFromRepo(repoId: ID!): DeployAppVersion!
   packageVersionCreated(publishedBy: ID, ownerId: ID): PackageVersion!
 
   """Subscribe to package version ready"""
