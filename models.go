@@ -42,7 +42,7 @@ type TestCase struct {
 	PackageVersion   PackageVersion
 	ExperimentID     uint
 	State            TestCaseState
-	Outcome          *Outcome
+	Outcome          *Outcome `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type TestCaseState int
@@ -119,9 +119,11 @@ type Outcome struct {
 
 type Registry struct {
 	gorm.Model
-	Endpoint string `gorm:"unique"`
-	Token    string
-	Owners   []Owner
+	Endpoint        string `gorm:"unique"`
+	Token           string
+	Owners          []Owner          `gorm:"constraint:OnDelete:CASCADE"`
+	Packages        []Package        `gorm:"constraint:OnDelete:CASCADE"`
+	PackageVersions []PackageVersion `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Owner struct {
@@ -129,20 +131,23 @@ type Owner struct {
 	RegistryID uint   `gorm:"index:idx_owner,unique"`
 	Name       string `gorm:"index:idx_owner,unique"`
 	OwnerType  OwnerType
-	Packages   []Package
+	Packages   []Package `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Package struct {
 	gorm.Model
-	OwnerID  uint   `gorm:"index:idx_package,unique"`
-	Name     string `gorm:"index:idx_package,unique"`
-	Versions []PackageVersion
+	RegistryID uint
+	OwnerID    uint             `gorm:"index:idx_package,unique"`
+	Name       string           `gorm:"index:idx_package,unique"`
+	Versions   []PackageVersion `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type PackageVersion struct {
 	gorm.Model
-	PackageID  uint   `gorm:"index:idx_package_version,unique"`
-	Version    string `gorm:"index:idx_package_version,unique"`
+	PackageID  uint
+	RegistryID uint
+	OwnerID    uint
+	Version    string
 	UpstreamID string
 	WebcId     uint
 	Webc       *Blob

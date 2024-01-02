@@ -75,35 +75,32 @@ func SynchroniseRegistries(
 		wg.Add(1)
 		go func(r Registry) {
 			defer wg.Done()
-			synchroniseRegistry(ctx, logger.Named(r.Endpoint), db, client, r, errorChan)
+			synchroniseRegistry(
+				ctx,
+				logger.With(zap.String("registry", r.Endpoint)),
+				db,
+				client,
+				r,
+				errorChan,
+			)
 
 		}(registry)
 	}
 
-	// Collect all errors in the background
-	resultChan := make(chan error)
 	go func() {
-		var allErrors []error
-		for err := range errorChan {
-			if err != nil && !errors.Is(err, context.Canceled) {
-				allErrors = append(allErrors, err)
-				cancel()
-			}
-		}
-
-		switch len(allErrors) {
-		case 0:
-			resultChan <- nil
-		case 1:
-			resultChan <- allErrors[0]
-		default:
-			panic("TODO: Handle multiple errors")
-		}
+		wg.Wait()
+		close(errorChan)
 	}()
 
-	wg.Wait()
-	close(errorChan)
-	return <-resultChan
+	var allErrors []error
+
+	for err := range errorChan {
+		if err != nil && !errors.Is(err, context.Canceled) {
+			allErrors = append(allErrors, err)
+		}
+	}
+
+	return errors.Join(allErrors...)
 }
 
 func synchroniseRegistry(
@@ -115,7 +112,7 @@ func synchroniseRegistry(
 	errorChan chan<- error,
 ) {
 	logger.Info("Syncing registry")
-	partials := make(chan partialPackageVersion)
+	partials := make(chan partialPackageVersion, 16)
 	gql := graphql.NewClient(registry.Endpoint, &authClient{inner: client, token: registry.Token})
 
 	go func() {
@@ -127,7 +124,7 @@ func synchroniseRegistry(
 	}()
 
 	wg := sync.WaitGroup{}
-	downloads := make(chan downloadedPackage)
+	downloads := make(chan downloadedPackage, 16)
 
 	for i := 0; i < maxConcurrentDownloads; i++ {
 		wg.Add(1)
@@ -136,15 +133,26 @@ func synchroniseRegistry(
 			defer wg.Done()
 
 			for p := range partials {
+				l := logger.With(
+					zap.String("owner", p.Owner),
+					zap.String("package", p.Package),
+					zap.String("version", p.Version),
+				)
+				var pvCount int64
+
+				err := db.
+					Model(&PackageVersion{}).
+					Where(&PackageVersion{UpstreamID: p.UpstreamID, Version: p.Version}).
+					Count(&pvCount).
+					Error
+				if err == nil && pvCount > 0 {
+					l.Debug("Already downloaded")
+					continue
+				}
+
 				logger.Debug("Downloading package", zap.Any("pkg", p))
 
-				downloaded, err := downloadPackage(
-					ctx,
-					logger.Named(fmt.Sprintf("%s/%s", p.Owner, p.Package)),
-					client,
-					p,
-				)
-
+				downloaded, err := downloadPackage(ctx, l, client, p)
 				if err == nil {
 					downloads <- downloaded
 				} else {
@@ -186,7 +194,7 @@ func savePartialPackage(
 
 	pkg := Package{
 		OwnerID: owner.ID,
-		Name:    partial.Owner,
+		Name:    partial.Package,
 	}
 	if err := db.Where(&pkg).FirstOrCreate(&pkg).Error; err != nil {
 		return fmt.Errorf("unable to save the package: %w", err)

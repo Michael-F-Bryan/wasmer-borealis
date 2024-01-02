@@ -7,6 +7,7 @@ import (
 	wasmer_borealis "github.com/Michael-F-Bryan/wasmer-borealis"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -25,6 +26,7 @@ func rootCommand() *cobra.Command {
 
 			if devMode {
 				cfg = zap.NewDevelopmentConfig()
+				cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 			} else {
 				cfg = zap.NewProductionConfig()
 			}
