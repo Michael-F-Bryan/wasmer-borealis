@@ -1,0 +1,27 @@
+query getAllPackages($after: String) {
+	allPackageVersions(after: $after) {
+		edges {
+      node {
+        id
+        version
+        distribution {
+          downloadUrl
+          webcDownloadUrl
+          webcSha256Hash
+        }
+        package {
+          packageName
+          id
+          owner {
+            globalName
+            globalId
+            __typename
+          }
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+    }
+	}
+}

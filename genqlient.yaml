@@ -1,0 +1,7 @@
+# Default genqlient config; for full documentation see:
+# https://github.com/Khan/genqlient/blob/main/docs/genqlient.yaml
+package: wasmer_borealis
+schema: wasmer-registry.graphql
+operations:
+  - graphql/*.graphql
+generated: graphql_generated.go

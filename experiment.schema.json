@@ -1,142 +1,66 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Experiment",
-  "description": "A Wasmer Borealis experiment.",
-  "type": "object",
-  "required": [
-    "package"
-  ],
-  "properties": {
-    "args": {
-      "description": "Arguments that should be passed through to the package.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "command": {
-      "description": "The command to run.\n\nPrimarily used when the package doesn't specify an entrypoint and there are multiple commands available.",
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "env": {
-      "description": "Environment variables that should be set for the package.",
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "filters": {
-      "$ref": "#/definitions/Filters"
-    },
-    "package": {
-      "description": "The name of the package used when running the experiment.",
-      "type": "string"
-    },
-    "wasmer": {
-      "$ref": "#/definitions/WasmerConfig"
-    }
-  },
-  "additionalProperties": false,
-  "definitions": {
-    "Filters": {
-      "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Michael-F-Bryan/wasmer-borealis/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "Config": {
       "properties": {
-        "blacklist": {
-          "description": "Packages that should be ignored.",
-          "type": "array",
+        "package": {
+          "type": "string"
+        },
+        "args": {
           "items": {
             "type": "string"
-          }
+          },
+          "type": "array"
+        },
+        "command": {
+          "type": "string"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "Filters": {
+          "$ref": "#/$defs/Filters"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "package",
+        "args",
+        "Filters"
+      ]
+    },
+    "Filters": {
+      "properties": {
+        "blacklist": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "include-every-version": {
-          "description": "Should every version of the package be published, or just the most recent one?",
           "type": "boolean"
         },
         "namespaces": {
-          "description": "If provided, the experiment will be limited to running packages under just these namespaces.",
-          "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "type": "array"
         },
         "users": {
-          "description": "If provided, the experiment will be limited to running packages under just these users.",
-          "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "type": "array"
         }
       },
-      "additionalProperties": false
-    },
-    "Version": {
-      "description": "A semver-compatible version number.",
-      "type": "string"
-    },
-    "WasmerConfig": {
-      "description": "Configuration for the `wasmer` CLI being used.",
-      "type": "object",
-      "required": [
-        "args"
-      ],
-      "properties": {
-        "args": {
-          "description": "Additional arguments to pass to the `wasmer` CLI.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "env": {
-          "description": "Environment variables passed to the `wasmer` CLI.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "version": {
-          "description": "Which `wasmer` CLI should we use?",
-          "allOf": [
-            {
-              "$ref": "#/definitions/WasmerVersion"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "WasmerVersion": {
-      "description": "The `wasmer` CLI version to use.",
-      "anyOf": [
-        {
-          "description": "A local binary.",
-          "type": "object",
-          "required": [
-            "path"
-          ],
-          "properties": {
-            "path": {
-              "description": "The path.",
-              "type": "string"
-            }
-          }
-        },
-        {
-          "description": "A released version.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/Version"
-            }
-          ]
-        },
-        {
-          "description": "Use the most recent version.",
-          "type": "null"
-        }
-      ]
+      "additionalProperties": false,
+      "type": "object"
     }
   }
 }
